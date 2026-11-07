@@ -1,7 +1,16 @@
 import java.util.Properties
 
-val localProperties = Properties()
-localProperties.load(rootProject.file("local.properties").inputStream())
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
+
+// Priority: local.properties -> FOOTBALL_API_KEY env var (CI secret) -> empty string.
+// An empty key still lets the app build; API calls will then fail with 401/403 at runtime.
+val footballApiKey: String =
+    localProperties.getProperty("FOOTBALL_API_KEY")
+        ?: System.getenv("FOOTBALL_API_KEY")
+        ?: ""
 
 plugins {
     alias(libs.plugins.android.application)
@@ -18,7 +27,7 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "FOOTBALL_API_KEY", "\"${localProperties["FOOTBALL_API_KEY"]}\"")
+        buildConfigField("String", "FOOTBALL_API_KEY", "\"$footballApiKey\"")
     }
 
     buildFeatures {
