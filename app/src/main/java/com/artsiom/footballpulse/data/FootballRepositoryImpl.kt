@@ -5,7 +5,6 @@ import com.artsiom.footballpulse.data.remote.MatchDto
 import com.artsiom.footballpulse.domain.model.Match
 import com.artsiom.footballpulse.domain.model.MatchDetail
 import com.artsiom.footballpulse.domain.model.MatchdayResult
-import com.artsiom.footballpulse.domain.model.Player
 import com.artsiom.footballpulse.domain.model.SquadPlayer
 import com.artsiom.footballpulse.domain.model.Standing
 import com.artsiom.footballpulse.domain.model.TeamDetails
@@ -123,11 +122,6 @@ class FootballRepositoryImpl(private val api: FootballApiService) : FootballRepo
         }
         val dto = response.body() ?: throw Exception("Empty response")
 
-        fun mapPlayers(list: List<com.artsiom.footballpulse.data.remote.PlayerDto>?) =
-            (list ?: emptyList())
-                .map { Player(it.name, it.shirtNumber, it.position) }
-                .sortedBy { it.shirtNumber ?: Int.MAX_VALUE }
-
         return MatchDetail(
             id = dto.id,
             homeTeam = dto.homeTeam.name,
@@ -136,10 +130,6 @@ class FootballRepositoryImpl(private val api: FootballApiService) : FootballRepo
             awayScore = dto.score.fullTime.away,
             date = dto.utcDate,
             status = dto.status,
-            homeLineup = mapPlayers(dto.homeTeam.lineup),
-            awayLineup = mapPlayers(dto.awayTeam.lineup),
-            homeBench = mapPlayers(dto.homeTeam.bench),
-            awayBench = mapPlayers(dto.awayTeam.bench),
             halfTimeHome = dto.score.halfTime?.home,
             halfTimeAway = dto.score.halfTime?.away,
             fullTimeHome = dto.score.fullTime.home,
