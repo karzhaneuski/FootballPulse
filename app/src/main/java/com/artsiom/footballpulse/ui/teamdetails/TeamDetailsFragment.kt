@@ -3,6 +3,7 @@ package com.artsiom.footballpulse.ui.teamdetails
 import android.graphics.Typeface
 import java.time.LocalDate
 import java.time.Period
+import java.time.format.DateTimeParseException
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -288,7 +289,11 @@ class TeamDetailsFragment : Fragment() {
 
     private fun calculateAge(dateOfBirth: String?): Int? {
         if (dateOfBirth == null) return null
-        val birthDate = LocalDate.parse(dateOfBirth)
+        val birthDate = try {
+            LocalDate.parse(dateOfBirth)
+        } catch (_: DateTimeParseException) {
+            return null
+        }
         return Period.between(birthDate, LocalDate.now()).years
     }
 
