@@ -1,16 +1,18 @@
 package com.artsiom.footballpulse.data.remote
 
-class ScoreDto(
-    val fullTime: FullTimeDto,
-    val halfTime: HalfTimeDto?
+import com.google.gson.annotations.SerializedName
+
+data class ScoreDto(
+    @SerializedName("fullTime") val fullTime: FullTimeDto,
+    @SerializedName("halfTime") val halfTime: HalfTimeDto?
 )
 
-class FullTimeDto(
-    val home: Int?,
-    val away: Int?
+data class FullTimeDto(
+    @SerializedName("home") val home: Int?,
+    @SerializedName("away") val away: Int?
 )
 
-class HalfTimeDto(
-    val home: Int?,
-    val away: Int?
+data class HalfTimeDto(
+    @SerializedName("home") val home: Int?,
+    @SerializedName("away") val away: Int?
 )

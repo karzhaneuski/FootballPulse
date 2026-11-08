@@ -19,3 +19,14 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Gson reflects on DTO fields, and Retrofit reflects on service methods.
+-keep class com.artsiom.footballpulse.data.remote.** { *; }
+
+# Preserve generic types and runtime annotations used by Gson and Retrofit.
+-keepattributes Signature, *Annotation*, InnerClasses, EnclosingMethod
+
+# R8 full mode retains generic signatures only when their types are kept.
+-keep,allowobfuscation,allowshrinking interface retrofit2.Call
+-keep,allowobfuscation,allowshrinking class retrofit2.Response
+-keep,allowobfuscation,allowshrinking interface kotlin.coroutines.Continuation

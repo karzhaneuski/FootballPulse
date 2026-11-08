@@ -1,7 +1,9 @@
 package com.artsiom.footballpulse.data.remote
 
+import com.google.gson.annotations.SerializedName
+
 data class TeamDto(
-    val id: Int,
-    val name: String,
-    val crest: String?
+    @SerializedName("id") val id: Int,
+    @SerializedName("name") val name: String,
+    @SerializedName("crest") val crest: String?
 )
