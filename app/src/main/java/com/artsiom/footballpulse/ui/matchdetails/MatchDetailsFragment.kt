@@ -77,9 +77,6 @@ class MatchDetailsFragment : Fragment() {
         val matchDate = view.findViewById<TextView>(R.id.matchDate)
         val matchStatus = view.findViewById<TextView>(R.id.matchStatus)
         val scoreContainer = view.findViewById<LinearLayout>(R.id.scoreContainer)
-        val benchCard = view.findViewById<View>(R.id.benchCard)
-
-        benchCard.visibility = View.GONE
 
         btnBack.setOnClickListener {
             requireActivity().supportFragmentManager.popBackStack()

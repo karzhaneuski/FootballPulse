@@ -13,6 +13,7 @@ import com.artsiom.footballpulse.data.remote.TeamDetailsDto
 import com.artsiom.footballpulse.data.remote.TeamDto
 import com.artsiom.footballpulse.domain.model.Match
 import com.artsiom.footballpulse.domain.repository.FootballRepository
+import com.google.gson.Gson
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -96,6 +97,45 @@ class FootballRepositoryInjectionTest {
         } catch (e: CancellationException) {
             assertSame(cancellation, e)
         }
+    }
+
+    @Test
+    fun `match details without lineup fields retain all displayed data`() = runBlocking {
+        val dto = Gson().fromJson(
+            """
+            {
+              "id": 42,
+              "utcDate": "2026-11-08T16:30:00Z",
+              "status": "FINISHED",
+              "homeTeam": {"id": 1, "name": "Home", "crest": "home.png"},
+              "awayTeam": {"id": 2, "name": "Away", "crest": "away.svg"},
+              "score": {"fullTime": {"home": 2, "away": 1}, "halfTime": {"home": 1, "away": 0}}
+            }
+            """.trimIndent(),
+            MatchDetailDto::class.java
+        )
+        val repository: FootballRepository = FootballRepositoryImpl(object : FakeApi() {
+            override suspend fun getMatchDetail(matchId: Int): Response<MatchDetailDto> {
+                assertEquals(42, matchId)
+                return Response.success(dto)
+            }
+        })
+
+        val match = repository.getMatchDetail(42)
+
+        assertEquals(42, match.id)
+        assertEquals("Home", match.homeTeam)
+        assertEquals("Away", match.awayTeam)
+        assertEquals("home.png", match.homeTeamCrest)
+        assertEquals("away.svg", match.awayTeamCrest)
+        assertEquals("2026-11-08T16:30:00Z", match.date)
+        assertEquals("FINISHED", match.status)
+        assertEquals(2, match.homeScore)
+        assertEquals(1, match.awayScore)
+        assertEquals(1, match.halfTimeHome)
+        assertEquals(0, match.halfTimeAway)
+        assertEquals(2, match.fullTimeHome)
+        assertEquals(1, match.fullTimeAway)
     }
 
     private open class FakeApi : FootballApiService {
