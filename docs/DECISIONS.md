@@ -30,6 +30,19 @@ Statuses: `Accepted` · `Rejected` · `Superseded by D-XXX` · `Proposed` (await
 
 ---
 
+## D-004: GEMINI.md delegates to AGENTS.md to avoid rule duplication in Antigravity
+
+- **Date:** 2026-11-08
+- **Status:** Accepted
+- **Issue / PR:** branch `chore/antigravity-setup`
+- **Decided by:** owner (task definition)
+
+**Context.** `GEMINI.md` previously contained `@AGENTS.md`. In Antigravity, `GEMINI.md` is loaded as a project rule and expanded inline while `AGENTS.md` is also loaded, causing duplicate context and precedence conflicts/drift.
+
+**Decision.** `GEMINI.md` explicitly designates `AGENTS.md` as the single source of truth and contains only Antigravity-specific notes (empty for now). `AGENTS.md` remains the authoritative source for all agents.
+
+**Consequences.** Prevents context duplication and rule precedence ambiguity across Antigravity, Claude Code, and Codex.
+
 ## D-003: CI checks build, unit tests and Android Lint on every PR
 
 - **Date:** 2026-11-07

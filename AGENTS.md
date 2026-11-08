@@ -1,7 +1,7 @@
 # AGENTS.md — FootballPulse
 
 Single source of instructions for all AI agents (Claude Code, Codex, Gemini / Antigravity, etc.).
-`CLAUDE.md` and `GEMINI.md` only import this file: make edits **here**.
+`CLAUDE.md` imports this file, and `GEMINI.md` delegates to it: make edits **here**.
 
 ## 1. Project
 
@@ -131,7 +131,9 @@ If an M-sized task is small in file count and does not require choosing an appro
 - `docs/AUDIT.md` — technical audit (source of tasks).
 - `docs/DECISIONS.md` — architectural decision log.
 - `docs/HANDOFF.md` — handoff of unfinished work between agents.
+- `docs/proposals/` — architectural proposals for `needs-decision` issues.
 - `.github/workflows/android-ci.yml` — CI.
+- `.agents/workflows/` — reusable workflow definitions for agents.
 
 ## 10. Language
 
@@ -139,3 +141,12 @@ All repository artifacts must be written in **English**, regardless of the langu
 conversation: code, comments, commit messages, branch names, issues, PR titles and descriptions,
 review comments, and docs. The only exception is user-facing app strings in `res/values*/strings.xml`,
 which follow the app's localization needs.
+
+## 11. Workflows
+
+Standardized prompt shortcuts (workflows) located in `.agents/workflows/` (invoked with `/` in Antigravity):
+
+- `implement-issue <issue-number>`: Read `AGENTS.md` and the given issue via `gh issue view`, create branch `agent/<N>-<short>`, implement within scope, run `./gradlew assembleDebug testDebugUnitTest lintDebug`, open a PR with `gh` (summary, files changed, verification, `Closes #N`).
+- `review-pr <pr-number>`: Check out the PR, run `./gradlew assembleDebug testDebugUnitTest lintDebug`, review against `AGENTS.md` and the issue DoD, post findings with `gh pr review --comment` marked `Blocker` / `Should fix` / `Nit`, never change code.
+- `handoff`: Update `docs/HANDOFF.md` (done, where stopped, next step, open questions) before ending a session.
+- `decide <issue-number>`: For a `needs-decision` issue, write a proposal in `docs/proposals/<N>-<topic>.md` with options, trade-offs, and a recommendation; do not write production code.
