@@ -1,73 +1,73 @@
-# Журнал решений (Decision Log)
+# Decision Log
 
-Сюда записывается каждое архитектурное или процессное решение: выбор библиотеки, подхода,
-отказ от чего-либо. Новые записи — сверху. Номер решения не переиспользуется.
+Every architectural or process decision is recorded here: choice of library or approach,
+rejecting something. New entries go on top. A decision number is never reused.
 
-Статусы: `Принято` · `Отклонено` · `Заменено D-XXX` · `Предложено` (ждёт решения владельца).
+Statuses: `Accepted` · `Rejected` · `Superseded by D-XXX` · `Proposed` (awaiting the owner's decision).
 
-## Шаблон
+## Template
 
 ```markdown
-## D-XXX: <краткое название>
+## D-XXX: <short title>
 
-- **Дата:** YYYY-MM-DD
-- **Статус:** Предложено | Принято | Отклонено | Заменено D-YYY
+- **Date:** YYYY-MM-DD
+- **Status:** Proposed | Accepted | Rejected | Superseded by D-YYY
 - **Issue / PR:** #N
-- **Кто решил:** <владелец / агент + кто одобрил>
+- **Decided by:** <owner / agent + who approved>
 
-**Контекст.** Какая проблема или развилка, какие ограничения.
+**Context.** What problem or fork in the road, what constraints.
 
-**Варианты.**
-1. <вариант A> — плюсы / минусы
-2. <вариант B> — плюсы / минусы
+**Options.**
+1. <option A> — pros / cons
+2. <option B> — pros / cons
 
-**Решение.** Что выбрали.
+**Decision.** What was chosen.
 
-**Почему.** Ключевые аргументы.
+**Why.** Key arguments.
 
-**Последствия.** Что меняется, что придётся сделать, от чего отказываемся.
+**Consequences.** What changes, what must be done, what we give up.
 ```
 
 ---
 
-## D-003: CI проверяет сборку, unit-тесты и Android Lint на каждый PR
+## D-003: CI checks build, unit tests and Android Lint on every PR
 
-- **Дата:** 2026-11-07
-- **Статус:** Принято
-- **Issue / PR:** ветка `chore/agents-setup`
-- **Кто решил:** владелец (постановка задачи), реализация — агент
+- **Date:** 2026-11-07
+- **Status:** Accepted
+- **Issue / PR:** branch `chore/agents-setup`
+- **Decided by:** owner (task definition), implementation — agent
 
-**Контекст.** Нужна автоматическая проверка PR от агентов.
+**Context.** PRs from agents need automated verification.
 
-**Решение.** GitHub Actions `.github/workflows/android-ci.yml`:
-`./gradlew assembleDebug testDebugUnitTest lintDebug` на JDK 21. Lint с настройками по умолчанию:
-ошибки валят сборку, предупреждения нет (на момент введения 0 ошибок, 97 предупреждений).
+**Decision.** GitHub Actions `.github/workflows/android-ci.yml`:
+`./gradlew assembleDebug testDebugUnitTest lintDebug` on JDK 21. Lint runs with default settings:
+errors fail the build, warnings do not (at the time of introduction: 0 errors, 97 warnings).
 
-**Последствия.** Lint-baseline не заводим. Ужесточение lint и Detekt/ktlint — отдельной задачей.
+**Consequences.** No lint baseline. Stricter lint and Detekt/ktlint are a separate task.
 
-## D-002: API-ключ: `local.properties` → переменная окружения → пустая строка
+## D-002: API key: `local.properties` → environment variable → empty string
 
-- **Дата:** 2026-11-07
-- **Статус:** Принято
-- **Issue / PR:** ветка `chore/agents-setup`
-- **Кто решил:** владелец (постановка задачи), реализация — агент
+- **Date:** 2026-11-07
+- **Status:** Accepted
+- **Issue / PR:** branch `chore/agents-setup`
+- **Decided by:** owner (task definition), implementation — agent
 
-**Контекст.** `app/build.gradle.kts` безусловно читал `local.properties`, поэтому чистый клон и CI
-падали на конфигурации (`docs/AUDIT.md` §2, §3.3).
+**Context.** `app/build.gradle.kts` read `local.properties` unconditionally, so a clean clone and CI
+failed at configuration time (`docs/AUDIT.md` §2, §3.3).
 
-**Решение.** Ключ берётся из `local.properties`, затем из env `FOOTBALL_API_KEY`
-(в CI это секрет репозитория), иначе пустая строка. Сборка без ключа не падает.
+**Decision.** The key is taken from `local.properties`, then from the `FOOTBALL_API_KEY` env variable
+(a repository secret in CI), otherwise an empty string. The build does not fail without a key.
 
-**Последствия.** CI зелёный без секрета (например, PR из форков). Понятное сообщение пользователю
-о пустом/неверном ключе — в задаче по типизированным ошибкам.
+**Consequences.** CI is green without a secret (e.g. PRs from forks). A clear user-facing message
+about an empty/invalid key belongs to the typed-errors task.
 
-## D-001: `AGENTS.md` как единый источник инструкций для агентов
+## D-001: `AGENTS.md` as the single source of agent instructions
 
-- **Дата:** 2026-11-07
-- **Статус:** Принято
-- **Issue / PR:** ветка `chore/agents-setup`
-- **Кто решил:** владелец
+- **Date:** 2026-11-07
+- **Status:** Accepted
+- **Issue / PR:** branch `chore/agents-setup`
+- **Decided by:** owner
 
-**Решение.** Все правила в `AGENTS.md`. `CLAUDE.md` и `GEMINI.md` содержат только импорт `@AGENTS.md`.
+**Decision.** All rules live in `AGENTS.md`. `CLAUDE.md` and `GEMINI.md` contain only the `@AGENTS.md` import.
 
-**Последствия.** Правила меняются в одном месте, расхождений между агентами нет.
+**Consequences.** Rules are changed in one place, no divergence between agents.
