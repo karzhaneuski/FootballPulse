@@ -30,6 +30,43 @@ Statuses: `Accepted` · `Rejected` · `Superseded by D-XXX` · `Proposed` (await
 
 ---
 
+## D-006: Dependency upgrades in grouped sequential steps, then Dependabot
+
+- **Date:** 2026-11-08
+- **Status:** Accepted
+- **Issue / PR:** #20
+- **Decided by:** owner
+
+**Context.** Libraries are 1–3 years behind (`docs/AUDIT.md` §1.2, §3.1 item 3) and `compileOptions` targets Java 11. DI step 2 (#34, D-005) needs Hilt ≥ 2.59.2 and KSP ≥ 2.3.6 on AGP 9. AGP 9.1.0 bundles Kotlin 2.2.10. See architectural proposal: [docs/proposals/20-dependency-upgrades.md](proposals/20-dependency-upgrades.md).
+
+**Options.**
+1. Everything in one PR — fast / regressions are hard to localize across layers.
+2. Grouped PRs in a fixed sequential order, then Dependabot — small reviewable steps with isolated failure causes / more PRs.
+3. Dependabot only — no manual work / proposes versions that break on older SDKs with no control over upgrade order.
+
+**Decision.** Option 2, executed after #9, in strict sequential order:
+0. **compileSdk 36** (keep `targetSdk` at 35) — #38
+1. **Java 17** (`compileOptions` 11 → 17) — #39
+2. **Retrofit 3.0.0** (`retrofit` + `converter-gson` 2.9.0 → 3.0.0; `logging-interceptor` stays 4.12.0) — #40
+3. **Coroutines 1.11.0 + Lifecycle 2.11.0** — #41
+4. **AndroidX UI** (`core-ktx`, `activity`, `appcompat`, `material`, `constraintlayout` — latest compatible with `compileSdk 36`; test libraries `androidx.test.ext:junit`, `espresso` upgraded alongside) — #42
+5. **Coil 2.7.0** (stay on 2.x) — #43
+6. **Dependabot** (`.github/dependabot.yml` for `gradle` and `github-actions`, weekly) — #44
+
+Room 2.6.1 stays until decided in #17. Pinned for #34: Hilt 2.59.2 and KSP 2.3.13. Raising `targetSdk` to 36 is a separate task (#45), scheduled with #19.
+
+**Why.**
+- Step 0 (`compileSdk 36`) only affects which APIs we compile against without runtime behavior change, and removes the `minCompileSdk` ceiling on `core-ktx`/`activity` so Dependabot needs no exclusions for them.
+- Isolates risks into single-cause, easily reviewable PRs.
+- Unblocks #34 (Hilt + KSP) early without premature AGP/Kotlin upgrades.
+- Avoids wasted work on libraries that #17 (Room) or #19 (UI framework) might replace.
+- Raising `targetSdk` to 36 involves runtime behavior changes and requires manual UI verification alongside the UI architecture decision (#19).
+
+**Consequences.**
+- Implementation is split into sequential issues (#38–#44, `agent:codex`, `size:S` / `size:M`), each blocked by the previous step.
+- Every step requires `./gradlew assembleDebug testDebugUnitTest lintDebug` and `./gradlew assembleRelease` to verify R8/ProGuard compatibility.
+- Separate `needs-decision` issue created: #45 ("Raise targetSdk to 36", `size:M`), scheduled with #19.
+
 ## D-005: Dependency injection with Hilt, introduced in two steps
 
 - **Date:** 2026-11-08
