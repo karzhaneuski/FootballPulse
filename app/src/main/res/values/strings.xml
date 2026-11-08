@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">FootballPulse</string>
+    <string name="retry">Retry</string>
 </resources>

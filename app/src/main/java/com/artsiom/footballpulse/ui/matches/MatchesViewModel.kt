@@ -34,6 +34,8 @@ class MatchesViewModel : ViewModel() {
     private val _currentLeagueCode = MutableStateFlow("PL")
     val currentLeagueCode: StateFlow<String> = _currentLeagueCode
 
+    private var lastRequest: (() -> Unit)? = null
+
     private var currentSeason: Int = 2025 // updated on first successful load
 
     init {
@@ -42,6 +44,7 @@ class MatchesViewModel : ViewModel() {
 
     /** Called when the user taps a league tab. */
     fun loadLeague(leagueCode: String) {
+        lastRequest = { loadLeague(leagueCode) }
         _currentLeagueCode.value = leagueCode
         loadJob?.cancel()
         loadJob = viewModelScope.launch {
@@ -56,6 +59,10 @@ class MatchesViewModel : ViewModel() {
                 _uiState.value = MatchesUiState.Error(e.message ?: "Unknown error")
             }
         }
+    }
+
+    fun retry() {
+        lastRequest?.invoke()
     }
 
     fun goToPreviousMatchday() {
@@ -75,13 +82,18 @@ class MatchesViewModel : ViewModel() {
         }
     }
 
-    private fun fetchMatchday(matchday: Int) {
+    private fun fetchMatchday(
+        matchday: Int,
+        leagueCode: String = _currentLeagueCode.value,
+        season: Int = currentSeason
+    ) {
+        lastRequest = { fetchMatchday(matchday, leagueCode, season) }
         loadJob?.cancel()
         loadJob = viewModelScope.launch {
             _uiState.value = MatchesUiState.Loading
             try {
                 val matches = repository.getMatchesByMatchday(
-                    _currentLeagueCode.value, matchday, currentSeason
+                    leagueCode, matchday, season
                 )
                 _uiState.value = MatchesUiState.Success(matches)
             } catch (e: Exception) {
