@@ -1,9 +1,6 @@
 package com.artsiom.footballpulse.ui.teamdetails
 
 import android.graphics.Typeface
-import java.time.LocalDate
-import java.time.Period
-import java.time.format.DateTimeParseException
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -20,10 +17,16 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import coil.load
+import com.artsiom.footballpulse.FootballPulseApp
 import com.artsiom.footballpulse.R
 import com.artsiom.footballpulse.domain.model.SquadPlayer
 import com.artsiom.footballpulse.domain.model.TeamDetails
+import java.time.LocalDate
+import java.time.Period
+import java.time.format.DateTimeParseException
 import kotlinx.coroutines.launch
 
 class TeamDetailsFragment : Fragment() {
@@ -48,7 +51,10 @@ class TeamDetailsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val teamId = requireArguments().getInt(ARG_TEAM_ID)
-        val factory = TeamDetailsViewModelFactory(teamId)
+        val repository = (requireActivity().application as FootballPulseApp).container.repository
+        val factory = viewModelFactory {
+            initializer { TeamDetailsViewModel(repository, teamId) }
+        }
         val viewModel = ViewModelProvider(this, factory)[TeamDetailsViewModel::class.java]
 
         val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)

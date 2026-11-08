@@ -1,17 +1,17 @@
 package com.artsiom.footballpulse.ui.matchdetails
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.artsiom.footballpulse.data.FootballRepository
+import com.artsiom.footballpulse.domain.repository.FootballRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class MatchDetailsViewModel(private val matchId: Int) : ViewModel() {
-
-    private val repository = FootballRepository()
+class MatchDetailsViewModel(
+    private val repository: FootballRepository,
+    private val matchId: Int
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow<MatchDetailsUiState>(MatchDetailsUiState.Loading)
     val uiState: StateFlow<MatchDetailsUiState> = _uiState
@@ -33,12 +33,5 @@ class MatchDetailsViewModel(private val matchId: Int) : ViewModel() {
                 _uiState.value = MatchDetailsUiState.Error(e.message ?: "Unknown error")
             }
         }
-    }
-}
-
-class MatchDetailsViewModelFactory(private val matchId: Int) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        @Suppress("UNCHECKED_CAST")
-        return MatchDetailsViewModel(matchId) as T
     }
 }

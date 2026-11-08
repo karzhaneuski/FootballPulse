@@ -14,8 +14,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.artsiom.footballpulse.FootballPulseApp
 import com.artsiom.footballpulse.MainActivity
 import com.artsiom.footballpulse.R
 import com.artsiom.footballpulse.ui.matches.LeaguesAdapter
@@ -31,7 +34,11 @@ class StandingsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // Scope ViewModel to Activity so data survives tab switches
-        val viewModel = ViewModelProvider(requireActivity())[StandingsViewModel::class.java]
+        val repository = (requireActivity().application as FootballPulseApp).container.repository
+        val factory = viewModelFactory {
+            initializer { StandingsViewModel(repository) }
+        }
+        val viewModel = ViewModelProvider(requireActivity(), factory)[StandingsViewModel::class.java]
 
         val leaguesRecyclerView = view.findViewById<RecyclerView>(R.id.standingsLeaguesRecyclerView)
         val standingsRecyclerView = view.findViewById<RecyclerView>(R.id.standingsRecyclerView)

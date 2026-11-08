@@ -12,8 +12,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.artsiom.footballpulse.FootballPulseApp
 import com.artsiom.footballpulse.MainActivity
 import com.artsiom.footballpulse.R
 import kotlinx.coroutines.flow.combine
@@ -39,7 +42,11 @@ class MatchesFragment : Fragment() {
         val btnNext = view.findViewById<TextView>(R.id.btnNextMatchday)
 
         // Scope ViewModel to Activity so data survives tab switches
-        val viewModel = ViewModelProvider(requireActivity())[MatchesViewModel::class.java]
+        val repository = (requireActivity().application as FootballPulseApp).container.repository
+        val factory = viewModelFactory {
+            initializer { MatchesViewModel(repository) }
+        }
+        val viewModel = ViewModelProvider(requireActivity(), factory)[MatchesViewModel::class.java]
 
         val matchesAdapter = MatchesAdapter { match ->
             (requireActivity() as MainActivity).navigateToMatchDetails(match.id)

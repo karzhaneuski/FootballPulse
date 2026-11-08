@@ -1,28 +1,24 @@
 package com.artsiom.footballpulse.data
 
+import com.artsiom.footballpulse.data.remote.FootballApiService
 import com.artsiom.footballpulse.data.remote.MatchDto
-import com.artsiom.footballpulse.data.remote.RetrofitInstance
 import com.artsiom.footballpulse.domain.model.Match
 import com.artsiom.footballpulse.domain.model.MatchDetail
+import com.artsiom.footballpulse.domain.model.MatchdayResult
 import com.artsiom.footballpulse.domain.model.Player
 import com.artsiom.footballpulse.domain.model.SquadPlayer
 import com.artsiom.footballpulse.domain.model.Standing
 import com.artsiom.footballpulse.domain.model.TeamDetails
-import kotlinx.coroutines.CancellationException
+import com.artsiom.footballpulse.domain.repository.FootballRepository
 import java.time.Instant
 import java.util.Calendar
+import kotlinx.coroutines.CancellationException
 
-data class MatchdayResult(
-    val matchday: Int,
-    val season: Int,
-    val matches: List<Match>
-)
+class FootballRepositoryImpl(private val api: FootballApiService) : FootballRepository {
 
-class FootballRepository {
-
-    suspend fun getCurrentMatchdayResult(leagueCode: String): MatchdayResult {
+    override suspend fun getCurrentMatchdayResult(leagueCode: String): MatchdayResult {
         val season = computeCurrentSeason()
-        val response = RetrofitInstance.api.getMatches(leagueCode, season)
+        val response = api.getMatches(leagueCode, season)
         if (!response.isSuccessful) {
             throw Exception("HTTP ${response.code()}: ${response.message()}")
         }
@@ -55,8 +51,8 @@ class FootballRepository {
         return MatchdayResult(currentMatchday, season, domainMatches)
     }
 
-    suspend fun getMatchesByMatchday(leagueCode: String, matchday: Int, season: Int): List<Match> {
-        val response = RetrofitInstance.api.getMatchesByMatchday(leagueCode, matchday, season)
+    override suspend fun getMatchesByMatchday(leagueCode: String, matchday: Int, season: Int): List<Match> {
+        val response = api.getMatchesByMatchday(leagueCode, matchday, season)
         if (!response.isSuccessful) {
             throw Exception("HTTP ${response.code()}: ${response.message()}")
         }
@@ -75,8 +71,8 @@ class FootballRepository {
         }
     }
 
-    suspend fun getStandings(leagueCode: String): List<Standing> {
-        val standingsResponse = RetrofitInstance.api.getStandings(leagueCode)
+    override suspend fun getStandings(leagueCode: String): List<Standing> {
+        val standingsResponse = api.getStandings(leagueCode)
         if (!standingsResponse.isSuccessful) {
             throw Exception("HTTP ${standingsResponse.code()}: ${standingsResponse.message()}")
         }
@@ -85,7 +81,7 @@ class FootballRepository {
         // football-data.org free tier returns form=null in standings.
         // Compute it from the finished matches endpoint instead.
         val formByTeamId: Map<Int, String> = try {
-            val matchesResponse = RetrofitInstance.api.getMatches(leagueCode, computeCurrentSeason())
+            val matchesResponse = api.getMatches(leagueCode, computeCurrentSeason())
             if (matchesResponse.isSuccessful) {
                 computeForm(matchesResponse.body()?.matches ?: emptyList())
             } else emptyMap()
@@ -120,8 +116,8 @@ class FootballRepository {
      * (oldest on the left, most recent on the right), matching the standard
      * standings display convention.
      */
-    suspend fun getMatchDetail(matchId: Int): MatchDetail {
-        val response = RetrofitInstance.api.getMatchDetail(matchId)
+    override suspend fun getMatchDetail(matchId: Int): MatchDetail {
+        val response = api.getMatchDetail(matchId)
         if (!response.isSuccessful) {
             throw Exception("HTTP ${response.code()}: ${response.message()}")
         }
@@ -153,8 +149,8 @@ class FootballRepository {
         )
     }
 
-    suspend fun getTeamById(id: Int): TeamDetails {
-        val response = RetrofitInstance.api.getTeam(id)
+    override suspend fun getTeamById(id: Int): TeamDetails {
+        val response = api.getTeam(id)
         if (!response.isSuccessful) throw Exception("HTTP ${response.code()}: ${response.message()}")
         val dto = response.body() ?: throw Exception("Empty response")
         return TeamDetails(

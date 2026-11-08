@@ -17,13 +17,16 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import coil.load
+import com.artsiom.footballpulse.FootballPulseApp
 import com.artsiom.footballpulse.R
 import com.artsiom.footballpulse.domain.model.MatchDetail
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
+import kotlinx.coroutines.launch
 
 class MatchDetailsFragment : Fragment() {
 
@@ -53,7 +56,10 @@ class MatchDetailsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val matchId = requireArguments().getInt(ARG_MATCH_ID)
-        val factory = MatchDetailsViewModelFactory(matchId)
+        val repository = (requireActivity().application as FootballPulseApp).container.repository
+        val factory = viewModelFactory {
+            initializer { MatchDetailsViewModel(repository, matchId) }
+        }
         val viewModel = ViewModelProvider(this, factory)[MatchDetailsViewModel::class.java]
 
         val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)

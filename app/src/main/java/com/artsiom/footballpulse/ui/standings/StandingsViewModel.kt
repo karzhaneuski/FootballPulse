@@ -2,17 +2,18 @@ package com.artsiom.footballpulse.ui.standings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.artsiom.footballpulse.data.FootballRepository
 import com.artsiom.footballpulse.domain.model.Leagues
+import com.artsiom.footballpulse.domain.repository.FootballRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class StandingsViewModel : ViewModel() {
+class StandingsViewModel(
+    private val repository: FootballRepository
+) : ViewModel() {
 
-    private val repository = FootballRepository()
     private var loadJob: Job? = null
 
     val leagues = Leagues.ALL
