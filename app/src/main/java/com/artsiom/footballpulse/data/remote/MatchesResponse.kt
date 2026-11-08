@@ -1,5 +1,7 @@
 package com.artsiom.footballpulse.data.remote
 
+import com.google.gson.annotations.SerializedName
+
 data class MatchesResponse(
-    val matches: List<MatchDto>
+    @SerializedName("matches") val matches: List<MatchDto>
 )
