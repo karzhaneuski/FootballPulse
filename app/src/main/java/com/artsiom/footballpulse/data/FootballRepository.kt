@@ -9,6 +9,7 @@ import com.artsiom.footballpulse.domain.model.SquadPlayer
 import com.artsiom.footballpulse.domain.model.Standing
 import com.artsiom.footballpulse.domain.model.TeamDetails
 import kotlinx.coroutines.CancellationException
+import java.time.Instant
 import java.util.Calendar
 
 data class MatchdayResult(
@@ -86,7 +87,7 @@ class FootballRepository {
         val formByTeamId: Map<Int, String> = try {
             val matchesResponse = RetrofitInstance.api.getMatches(leagueCode, computeCurrentSeason())
             if (matchesResponse.isSuccessful) {
-                computeFormByTeam(matchesResponse.body()?.matches ?: emptyList())
+                computeForm(matchesResponse.body()?.matches ?: emptyList())
             } else emptyMap()
         } catch (e: Exception) {
             if (e is CancellationException) throw e
@@ -171,39 +172,6 @@ class FootballRepository {
         )
     }
 
-    private fun computeFormByTeam(matches: List<MatchDto>): Map<Int, String> {
-        // Sort ascending by matchday so the last entries are the most recent
-        val finishedSorted = matches
-            .filter { it.status == "FINISHED" }
-            .sortedBy { it.matchday ?: Int.MAX_VALUE }
-
-        val resultsByTeam = mutableMapOf<Int, MutableList<String>>()
-
-        for (match in finishedSorted) {
-            val homeGoals = match.score.fullTime.home ?: continue
-            val awayGoals = match.score.fullTime.away ?: continue
-
-            val homeResult = when {
-                homeGoals > awayGoals -> "W"
-                homeGoals < awayGoals -> "L"
-                else -> "D"
-            }
-            val awayResult = when (homeResult) {
-                "W" -> "L"
-                "L" -> "W"
-                else -> "D"
-            }
-
-            resultsByTeam.getOrPut(match.homeTeam.id) { mutableListOf() }.add(homeResult)
-            resultsByTeam.getOrPut(match.awayTeam.id) { mutableListOf() }.add(awayResult)
-        }
-
-        // Take the last 5 results per team and join without separator
-        return resultsByTeam.mapValues { (_, results) ->
-            results.takeLast(5).joinToString("")
-        }
-    }
-
     private fun computeCurrentSeason(): Int {
         val cal = Calendar.getInstance()
         // European leagues start in August (month index 7)
@@ -212,5 +180,41 @@ class FootballRepository {
         } else {
             cal.get(Calendar.YEAR) - 1
         }
+    }
+}
+
+internal fun computeForm(matches: List<MatchDto>): Map<Int, String> {
+    // Postponed fixtures must count when played, regardless of their original matchday.
+    val finishedSorted = matches
+        .filter { it.status == "FINISHED" }
+        .sortedWith(
+            compareBy<MatchDto> { Instant.parse(it.utcDate) }
+                .thenBy { it.matchday ?: Int.MAX_VALUE }
+        )
+
+    val resultsByTeam = mutableMapOf<Int, MutableList<String>>()
+
+    for (match in finishedSorted) {
+        val homeGoals = match.score.fullTime.home ?: continue
+        val awayGoals = match.score.fullTime.away ?: continue
+
+        val homeResult = when {
+            homeGoals > awayGoals -> "W"
+            homeGoals < awayGoals -> "L"
+            else -> "D"
+        }
+        val awayResult = when (homeResult) {
+            "W" -> "L"
+            "L" -> "W"
+            else -> "D"
+        }
+
+        resultsByTeam.getOrPut(match.homeTeam.id) { mutableListOf() }.add(homeResult)
+        resultsByTeam.getOrPut(match.awayTeam.id) { mutableListOf() }.add(awayResult)
+    }
+
+    // Take the last 5 results per team and join without separator
+    return resultsByTeam.mapValues { (_, results) ->
+        results.takeLast(5).joinToString("")
     }
 }
