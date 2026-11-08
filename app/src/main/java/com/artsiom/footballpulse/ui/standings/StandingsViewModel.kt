@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.artsiom.footballpulse.data.FootballRepository
 import com.artsiom.footballpulse.domain.model.Leagues
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -11,6 +13,7 @@ import kotlinx.coroutines.launch
 class StandingsViewModel : ViewModel() {
 
     private val repository = FootballRepository()
+    private var loadJob: Job? = null
 
     val leagues = Leagues.ALL
 
@@ -44,12 +47,14 @@ class StandingsViewModel : ViewModel() {
     }
 
     private fun fetchStandings() {
-        viewModelScope.launch {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             _uiState.value = StandingsUiState.Loading
             try {
                 val standings = repository.getStandings(_currentLeagueCode.value)
                 _uiState.value = StandingsUiState.Success(standings)
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
                 _uiState.value = StandingsUiState.Error(e.message ?: "Unknown error")
             }
         }

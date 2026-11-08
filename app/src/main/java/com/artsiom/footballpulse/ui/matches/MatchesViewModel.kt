@@ -2,6 +2,8 @@ package com.artsiom.footballpulse.ui.matches
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -11,6 +13,7 @@ import com.artsiom.footballpulse.domain.model.Leagues
 class MatchesViewModel : ViewModel() {
 
     private val repository = FootballRepository()
+    private var loadJob: Job? = null
 
     private val _uiState = MutableStateFlow<MatchesUiState>(MatchesUiState.Loading)
     val uiState: StateFlow<MatchesUiState> = _uiState
@@ -40,7 +43,8 @@ class MatchesViewModel : ViewModel() {
     /** Called when the user taps a league tab. */
     fun loadLeague(leagueCode: String) {
         _currentLeagueCode.value = leagueCode
-        viewModelScope.launch {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             _uiState.value = MatchesUiState.Loading
             try {
                 val result = repository.getCurrentMatchdayResult(leagueCode)
@@ -48,6 +52,7 @@ class MatchesViewModel : ViewModel() {
                 _currentMatchday.value = result.matchday
                 _uiState.value = MatchesUiState.Success(result.matches)
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
                 _uiState.value = MatchesUiState.Error(e.message ?: "Unknown error")
             }
         }
@@ -71,7 +76,8 @@ class MatchesViewModel : ViewModel() {
     }
 
     private fun fetchMatchday(matchday: Int) {
-        viewModelScope.launch {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             _uiState.value = MatchesUiState.Loading
             try {
                 val matches = repository.getMatchesByMatchday(
@@ -79,6 +85,7 @@ class MatchesViewModel : ViewModel() {
                 )
                 _uiState.value = MatchesUiState.Success(matches)
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
                 _uiState.value = MatchesUiState.Error(e.message ?: "Unknown error")
             }
         }

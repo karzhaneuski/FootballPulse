@@ -8,6 +8,7 @@ import com.artsiom.footballpulse.domain.model.Player
 import com.artsiom.footballpulse.domain.model.SquadPlayer
 import com.artsiom.footballpulse.domain.model.Standing
 import com.artsiom.footballpulse.domain.model.TeamDetails
+import kotlinx.coroutines.CancellationException
 import java.util.Calendar
 
 data class MatchdayResult(
@@ -87,7 +88,8 @@ class FootballRepository {
             if (matchesResponse.isSuccessful) {
                 computeFormByTeam(matchesResponse.body()?.matches ?: emptyList())
             } else emptyMap()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
             emptyMap()
         }
 

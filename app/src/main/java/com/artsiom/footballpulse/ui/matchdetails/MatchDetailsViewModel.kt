@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.artsiom.footballpulse.data.FootballRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -28,6 +29,7 @@ class MatchDetailsViewModel(private val matchId: Int) : ViewModel() {
                 val match = repository.getMatchDetail(matchId)
                 _uiState.value = MatchDetailsUiState.Success(match)
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
                 _uiState.value = MatchDetailsUiState.Error(e.message ?: "Unknown error")
             }
         }
