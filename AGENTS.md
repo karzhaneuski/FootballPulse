@@ -106,6 +106,8 @@ return 401/403. The key is never committed.
 - ❌ Do not make architectural decisions silently: fork in the road → `needs-decision` label and a question to the owner.
 - ❌ Do not record transient environment or tooling issues (proxy errors, missing SDK, network failures) in repository docs; report them only in the PR description or task output.
 - ❌ In Codex Cloud, do not create PRs via gh/GitHub API from the container; push the branch and leave PR creation to the Codex UI.
+- ❌ Do not run `git checkout` or `git switch` in the main working copy (`~/FootballPulse`).
+- ❌ Do not put unrelated folders or worktrees inside the repository or in `/tmp`.
 
 ## 8. Routing
 
@@ -145,7 +147,16 @@ which follow the app's localization needs.
 
 Standardized prompt shortcuts (workflows) located in `.agents/workflows/` (invoked with `/` in Antigravity):
 
-- `implement-issue <issue-number>`: Read `AGENTS.md` and the given issue via `gh issue view`, create branch `agent/<N>-<short>`, implement within scope, run `./gradlew assembleDebug testDebugUnitTest lintDebug`, open a PR with `gh` (summary, files changed, verification, `Closes #N`).
-- `review-pr <pr-number>`: Check out the PR, run `./gradlew assembleDebug testDebugUnitTest lintDebug`, review against `AGENTS.md` and the issue DoD, post findings with `gh pr review --comment` marked `Blocker` / `Should fix` / `Nit`, never change code.
+- `implement-issue <issue-number>`: Read `AGENTS.md` and the given issue via `gh issue view`, create worktree `../FootballPulse-<agent>-<N>`, implement within scope, run `./gradlew assembleDebug testDebugUnitTest lintDebug`, rebase on `origin/main`, open a PR with `gh` (summary, files changed, verification, `Closes #N`), and remove worktree after merge.
+- `review-pr <pr-number>`: Create worktree `../FootballPulse-<agent>-review-pr<pr-number>`, check out PR, run `./gradlew assembleDebug testDebugUnitTest lintDebug`, review against `AGENTS.md` and the issue DoD, post findings with `gh pr review --comment` marked `Blocker` / `Should fix` / `Nit`, never change code, and remove worktree.
 - `handoff`: Update `docs/HANDOFF.md` (done, where stopped, next step, open questions) before ending a session.
-- `decide <issue-number>`: For a `needs-decision` issue, write a proposal in `docs/proposals/<N>-<topic>.md` with options, trade-offs, and a recommendation; do not write production code.
+- `decide <issue-number>`: For a `needs-decision` issue, create worktree `../FootballPulse-<agent>-decision-<N>`, write a proposal in `docs/proposals/<N>-<topic>.md` with options, trade-offs, and a recommendation; do not write production code, open a PR, and remove worktree after merge.
+
+## 12. Parallel work
+
+- **Main working copy ownership:** The main working copy (`~/FootballPulse`) belongs to the human and to the implementer; agents never run `git checkout` or `git switch` in the main working copy.
+- **Dedicated worktrees:** Every agent task runs in its own git worktree under `../FootballPulse-<agent>-<task>` (never in `/tmp`, which macOS cleans).
+- **Workspace cleanliness:** Never put unrelated folders inside the repository.
+- **Parallel file isolation:** Tasks running in parallel must not touch the same files.
+- **Rebase before PR:** Before opening or merging a PR, rebase on the latest `origin/main`.
+- **Worktree cleanup:** Remove the worktree after the PR is merged.
