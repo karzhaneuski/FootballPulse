@@ -30,6 +30,38 @@ Statuses: `Accepted` · `Rejected` · `Superseded by D-XXX` · `Proposed` (await
 
 ---
 
+## D-005: Dependency injection with Hilt, introduced in two steps
+
+- **Date:** 2026-11-08
+- **Status:** Accepted
+- **Issue / PR:** #16
+- **Decided by:** owner
+
+**Context.** ViewModels create `FootballRepository()` themselves, the repository accesses the global `object RetrofitInstance` directly, and details screens use hand-written `ViewModelProvider.Factory` classes. No unit tests can be written (#15). The Hilt 2.50 plugin declared in `build.gradle.kts` is unused and incompatible with AGP 9. See architectural proposal: [docs/proposals/16-dependency-injection.md](proposals/16-dependency-injection.md).
+
+**Options.**
+1. Hilt — industry standard for Android, compile-time validation / requires Hilt ≥ 2.59.2 and KSP ≥ 2.3.6 on AGP 9, largest toolchain footprint.
+2. Koin — simple Kotlin DSL, no code generation / runtime errors, weaker portfolio signal for junior Android roles.
+3. Manual DI (`AppContainer`) — zero new dependencies, transparent architecture / manual lifecycle and scoping boilerplate grows with the app.
+
+**Decision.** Hilt, introduced in two steps:
+- **Step 1:** Repository interface in `domain` + constructor injection for all ViewModels and the repository (via `viewModelFactory`/`initializer`, no new dependencies).
+- **Step 2:** Migrate to Hilt + KSP, only after the dependency-upgrade decision (#20), because Hilt ≥ 2.59.2 and KSP ≥ 2.3.6 are required for AGP 9.
+
+**Why.**
+- Step 1 unblocks testing (#15) regardless of framework.
+- Hilt is the industry-standard DI expected in a junior Android portfolio.
+- Splitting isolates the risky version upgrade from architectural decoupling.
+- Manual DI remains a fallback if Hilt does not work with AGP 9.
+- **Rejected:** Koin (adds a dependency without the portfolio recognition of Hilt or the zero-dependency simplicity of manual DI).
+
+**Consequences.**
+- Implementation is split into two issues:
+  - Step 1: #33 (DI step 1: repository interface and constructor injection, `agent:codex`, `size:M`). Unblocks #15.
+  - Step 2: #34 (DI step 2: migrate to Hilt + KSP, `agent:codex`, `size:M`), blocked by #20 and #33.
+- Unit tests (#15) can be written as soon as step 1 lands without waiting for Hilt or toolchain changes.
+- KSP introduced in step 2 can be shared with Room if selected in #17.
+
 ## D-004: GEMINI.md delegates to AGENTS.md to avoid rule duplication in Antigravity
 
 - **Date:** 2026-11-08
