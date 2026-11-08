@@ -111,8 +111,8 @@ Every issue gets a size label and an assignee label.
 
 | Label | When to apply |
 |---|---|
-| `agent:codex` | A size **S** task with clear, verifiable acceptance criteria: 1–3 files, no choice of approach, result verified by a build/test/specific behavior. |
-| `agent:antigravity` | Large multi-file changes (**M/L**): refactoring across several layers, migrations, bulk mechanical edits, a new feature spanning several screens. The approach is already chosen. |
+| `agent:codex` | All size **S** and **M** implementation tasks. Codex is the main implementer. |
+| `agent:antigravity` | Documentation, translations, repository maintenance, and PR reviews performed by Gemini in Antigravity. |
 | `needs-decision` | There is an architectural fork (which library/approach to choose, whether to change the structure). The agent **does not start** implementation until the owner makes a decision and it is recorded in `docs/DECISIONS.md`. After the decision the label is removed and `agent:*` is applied. |
 
 Sizes:
@@ -122,9 +122,6 @@ Sizes:
 | `size:S` | up to ~1–2 hours, 1–3 files, no new dependencies or one obvious one |
 | `size:M` | half a day to a day, 4–10 files or several layers |
 | `size:L` | several days, touches most of the app |
-
-If an M-sized task is small in file count and does not require choosing an approach, it can be given to
-`agent:codex`; when in doubt — `agent:antigravity`.
 
 ## 9. Useful files
 
