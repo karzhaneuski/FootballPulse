@@ -104,6 +104,8 @@ return 401/403. The key is never committed.
 - ❌ Do not disable, delete, or mark tests and lint checks with `@Ignore` just to turn CI green.
 - ❌ Do not go beyond the scope of the issue: report problems you notice as a separate issue instead of fixing them in passing.
 - ❌ Do not make architectural decisions silently: fork in the road → `needs-decision` label and a question to the owner.
+- ❌ Do not record transient environment or tooling issues (proxy errors, missing SDK, network failures) in repository docs; report them only in the PR description or task output.
+- ❌ In Codex Cloud, do not create PRs via gh/GitHub API from the container; push the branch and leave PR creation to the Codex UI.
 
 ## 8. Routing
 
