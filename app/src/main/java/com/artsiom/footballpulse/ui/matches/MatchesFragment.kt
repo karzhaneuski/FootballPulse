@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -29,6 +30,8 @@ class MatchesFragment : Fragment() {
 
         val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
         val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView)
+        val errorLayout = view.findViewById<View>(R.id.errorLayout)
+        val retryButton = view.findViewById<Button>(R.id.retryButton)
         val errorText = view.findViewById<TextView>(R.id.errorText)
         val leaguesRecyclerView = view.findViewById<RecyclerView>(R.id.leaguesRecyclerView)
         val matchdayLabel = view.findViewById<TextView>(R.id.matchdayLabel)
@@ -51,6 +54,8 @@ class MatchesFragment : Fragment() {
         leaguesAdapter.submitList(viewModel.leagues)
         val matchesLeagueIdx = viewModel.leagues.indexOfFirst { it.code == viewModel.currentLeagueCode.value }
         if (matchesLeagueIdx >= 0) leaguesAdapter.setSelectedPosition(matchesLeagueIdx)
+
+        retryButton.setOnClickListener { viewModel.retry() }
 
         btnPrev.setOnClickListener { viewModel.goToPreviousMatchday() }
         btnNext.setOnClickListener { viewModel.goToNextMatchday() }
@@ -81,18 +86,18 @@ class MatchesFragment : Fragment() {
                             is MatchesUiState.Loading -> {
                                 progressBar.visibility = View.VISIBLE
                                 recyclerView.visibility = View.GONE
-                                errorText.visibility = View.GONE
+                                errorLayout.visibility = View.GONE
                             }
                             is MatchesUiState.Success -> {
                                 progressBar.visibility = View.GONE
                                 recyclerView.visibility = View.VISIBLE
-                                errorText.visibility = View.GONE
+                                errorLayout.visibility = View.GONE
                                 matchesAdapter.submitList(state.matches)
                             }
                             is MatchesUiState.Error -> {
                                 progressBar.visibility = View.GONE
                                 recyclerView.visibility = View.GONE
-                                errorText.visibility = View.VISIBLE
+                                errorLayout.visibility = View.VISIBLE
                                 errorText.text = state.message
                             }
                         }
