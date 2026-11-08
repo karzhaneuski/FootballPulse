@@ -1,35 +1,35 @@
 # Handoff
 
-Заполняется агентом, когда работа над задачей прерывается: закончился лимит, блокер,
-нужна развилка или передача другому агенту. Следующий агент начинает с чтения этого файла.
-Старые записи удаляй после того, как задачу закрыли (история остаётся в git).
+Filled in by an agent when work on a task is interrupted: limit reached, blocker,
+a fork in the road, or handoff to another agent. The next agent starts by reading this file.
+Delete old entries once the task is closed (history stays in git).
 
-## Шаблон
+## Template
 
 ```markdown
-## #<номер issue>: <название> — <YYYY-MM-DD>
+## #<issue number>: <title> — <YYYY-MM-DD>
 
-- **Агент:** <claude / codex / antigravity / ...>
-- **Ветка:** `agent/<номер>-<кратко>`
-- **PR:** #N (draft) | нет
+- **Agent:** <claude / codex / antigravity / ...>
+- **Branch:** `agent/<number>-<short-description>`
+- **PR:** #N (draft) | none
 
-### Что сделано
+### Done
 - ...
 
-### Где остановился
-- Последний коммит: `<sha>` — <что в нём>
-- Текущее состояние: собирается? тесты проходят? (вывод команды или ссылка на CI)
+### Where I stopped
+- Last commit: `<sha>` — <what it contains>
+- Current state: does it build? do tests pass? (command output or CI link)
 
-### Следующий шаг
-1. <конкретное действие, с файлом и функцией>
+### Next step
+1. <specific action, with file and function>
 2. ...
 
-### Открытые вопросы
-- <вопрос> → нужен ответ владельца? (если да, на issue метка `needs-decision`)
+### Open questions
+- <question> → is an owner answer needed? (if so, add the `needs-decision` label to the issue)
 ```
 
 ---
 
-<!-- Активные handoff-записи ниже этой строки -->
+<!-- Active handoff entries go below this line -->
 
-_Активных handoff нет._
+_No active handoffs._

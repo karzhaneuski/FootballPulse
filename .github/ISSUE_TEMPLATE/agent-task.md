@@ -1,36 +1,36 @@
 ---
 name: Agent task
-about: Задача для ИИ-агента (Codex / Antigravity / Claude) или для человека
-title: "[area] Кратко, что сделать"
+about: Task for an AI agent (Codex / Antigravity / Claude) or for a human
+title: "[area] Short description of what to do"
 labels: []
 assignees: []
 ---
 
 <!--
-Метки: размер (size:S / size:M / size:L) + исполнитель (agent:codex / agent:antigravity)
-или needs-decision, если есть развилка. Правила маршрутизации описаны в AGENTS.md, §8.
+Labels: size (size:S / size:M / size:L) + assignee (agent:codex / agent:antigravity)
+or needs-decision if there is a fork in the road. Routing rules are described in AGENTS.md, §8.
 -->
 
-## Контекст
-<!-- Зачем это нужно. Ссылка на пункт docs/AUDIT.md, если задача оттуда. -->
+## Context
+<!-- Why this is needed. Link to the docs/AUDIT.md item if the task comes from there. -->
 
-## Задача
-<!-- Что именно сделать. Конкретно, без двусмысленностей. -->
+## Task
+<!-- What exactly to do. Be specific and unambiguous. -->
 
-## Критерии готовности (DoD)
+## Definition of done (DoD)
 - [ ] ...
-- [ ] `./gradlew assembleDebug testDebugUnitTest lintDebug` проходит локально и в CI
+- [ ] `./gradlew assembleDebug testDebugUnitTest lintDebug` passes locally and in CI
 
-## Затрагиваемые файлы
-<!-- Ожидаемый список; агент может отступить, но должен объяснить почему в PR. -->
+## Affected files
+<!-- Expected list; the agent may deviate but must explain why in the PR. -->
 - `...`
 
-## Вне рамок
-<!-- Что НЕ делать в этой задаче. -->
-- Не менять версии зависимостей (если это не цель задачи).
+## Out of scope
+<!-- What NOT to do in this task. -->
+- Do not change dependency versions (unless that is the goal of the task).
 
-## Как проверить
-<!-- Шаги ручной проверки или тесты, которые должны появиться. -->
+## How to verify
+<!-- Manual verification steps or tests that should appear. -->
 
-## Зависимости
-<!-- Блокируется: #N. Блокирует: #M. Решение: D-XXX в docs/DECISIONS.md. -->
+## Dependencies
+<!-- Blocked by: #N. Blocks: #M. Decision: D-XXX in docs/DECISIONS.md. -->
