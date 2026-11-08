@@ -7,9 +7,11 @@ description: Write an architectural proposal in docs/proposals/ for a needs-deci
 Follow this workflow when analyzing a task labeled `needs-decision` to prepare a structured proposal for the project owner.
 
 ## Guardrails
+- **Worktree isolation**: Never run `git checkout` or `git switch` in the main working copy (`~/FootballPulse`). Author proposals in a dedicated worktree under `../FootballPulse-<agent>-decision-<issue-number>` (never in `/tmp`, which macOS cleans). Never put unrelated folders inside the repository.
 - **No production code**: Do NOT implement production code or modify application logic during this workflow. Only documentation proposals are produced.
 - **Objective trade-offs**: Present at least two realistic options with objective pros and cons.
 - **Alignment**: Ensure options align with existing decisions in `docs/DECISIONS.md` and the stack in `AGENTS.md`.
+- **Rebase before PR**: Always rebase on the latest `origin/main` before opening or merging a PR.
 
 ## Steps
 
@@ -26,7 +28,17 @@ Follow this workflow when analyzing a task labeled `needs-decision` to prepare a
 - Inspect the relevant files and architecture in the repository.
 - Research viable alternatives, library constraints, performance, maintenance, and migration impact.
 
-### 3. Author the Proposal Document
+### 3. Prepare Worktree and Author the Proposal Document
+- Fetch latest changes from `origin`:
+  ```bash
+  git fetch origin
+  ```
+- Create a dedicated worktree under `../FootballPulse-<agent>-<task>` branched from `origin/main`:
+  ```bash
+  git worktree add ../FootballPulse-<agent>-decision-<issue-number> -b docs/proposal-<issue-number>-<topic> origin/main
+  cd ../FootballPulse-<agent>-decision-<issue-number>
+  ```
+- *Note*: Never run `git checkout` or `git switch` in the main working copy (`~/FootballPulse`).
 - Create a proposal file at `docs/proposals/<issue-number>-<topic>.md` (create `docs/proposals/` if it does not exist).
 - Use the following structure:
   ```markdown
@@ -69,10 +81,33 @@ Follow this workflow when analyzing a task labeled `needs-decision` to prepare a
   <Provide a draft D-XXX entry following the DECISIONS.md template ready to be recorded once approved.>
   ```
 
-### 4. Link Proposal in Issue
-- Add a comment to the GitHub issue linking to the proposal document:
+### 4. Commit, Push, and Open PR
+- Rebase on latest `origin/main`:
   ```bash
-  gh issue comment <issue-number> --body "Prepared architectural proposal: \`docs/proposals/<issue-number>-<topic>.md\`. Awaiting owner decision."
+  git fetch origin
+  git rebase origin/main
+  ```
+- Commit and push:
+  ```bash
+  git add docs/proposals/<issue-number>-<topic>.md
+  git commit -m "docs: add proposal for #<issue-number>"
+  git push -u origin docs/proposal-<issue-number>-<topic>
+  ```
+- Open a PR to `main` using GitHub CLI:
+  ```bash
+  gh pr create --base main --title "docs: proposal for #<issue-number> (<topic>)" --body "Proposal document for #<issue-number>."
+  ```
+
+### 5. Link Proposal in Issue
+- Add a comment to the GitHub issue linking to the proposal document and PR:
+  ```bash
+  gh issue comment <issue-number> --body "Prepared architectural proposal: \`docs/proposals/<issue-number>-<topic>.md\` (PR #<pr-number>). Awaiting owner decision."
   ```
 - Keep the `needs-decision` label until the owner makes an official decision.
+
+### 6. Clean Up Worktree
+- After the proposal PR is merged, remove the worktree:
+  ```bash
+  git worktree remove ../FootballPulse-<agent>-decision-<issue-number>
+  ```
 
