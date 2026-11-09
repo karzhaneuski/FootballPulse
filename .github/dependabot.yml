@@ -4,6 +4,22 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      # D-006: Core 1.19+ requires compileSdk 37; this project compiles against 36.
+      - dependency-name: "androidx.core:core-ktx"
+        versions: ["[1.19.0,)"]
+      # D-005/D-006: Dagger artifacts and the Hilt plugin must stay <= 2.59.2
+      # with Kotlin bundled in AGP 9.1; 2.60+ needs a deliberate toolchain upgrade.
+      - dependency-name: "com.google.dagger*"
+        versions: ["[2.60,)"]
+      # D-006: Freeze Room updates until the caching decision in #17.
+      - dependency-name: "androidx.room:*"
+      # D-006: AGP major/minor plugin upgrades require a separate toolchain task.
+      - dependency-name: "com.android.application"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      # D-006: Apply the same AGP policy to its Maven artifact; patches stay allowed.
+      - dependency-name: "com.android.tools.build:gradle"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
     # Major upgrades remain individual PRs for easier compatibility review.
     groups:
       androidx-and-material:
