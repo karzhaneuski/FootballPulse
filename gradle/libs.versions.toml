@@ -17,7 +17,7 @@ coroutines = "1.11.0"
 lifecycle = "2.10.0"
 room = "2.6.1"
 coil = "2.7.0"
-hilt = "2.50"
+hilt = "2.59.2"
 detekt = "1.23.8"
 # Must match the Kotlin compiler bundled in AGP 9.1.0.
 composeCompiler = "2.2.10"
