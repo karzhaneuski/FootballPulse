@@ -30,6 +30,46 @@ Statuses: `Accepted` · `Rejected` · `Superseded by D-XXX` · `Proposed` (await
 
 ---
 
+## D-007: UI migrates fully to Jetpack Compose, screen by screen
+
+- **Date:** 2026-11-09
+- **Status:** Accepted
+- **Issue / PR:** #19
+- **Decided by:** owner
+
+**Context.** The UI is XML Views with 69 `findViewById` calls, 3 adapters on `notifyDataSetChanged()` and
+details screens that build rows in code (`docs/AUDIT.md` §3.4, §4 items 7–8). Doing ViewBinding and then
+Compose is double work. Compose cannot be added to the current build as is: with Lifecycle 2.11.0,
+`lifecycle-runtime-compose` requires `compileSdk 37`, which is unsupported by AGP 9.1.0. See architectural
+proposal: [docs/proposals/19-compose-migration.md](proposals/19-compose-migration.md).
+
+**Options.**
+1. ViewBinding + ListAdapter/DiffUtil — low risk, size M / weakest portfolio result, discarded if Compose comes later.
+2. Permanent hybrid (details on Compose, tabs on ViewBinding) — fixes the worst code / two toolkits forever.
+3a. Full Compose in one rewrite — shortest / one unreviewable PR, blocks other UI issues.
+3b. Full Compose screen by screen via `ComposeView` in existing fragments, shell and navigation last — small
+    PRs, `main` always shippable / two theme definitions and the #18 bugs remain during the migration.
+
+**Decision.** Option 3b on `compileSdk 36` / AGP 9.1.0: full migration to Jetpack Compose, screen by screen via `ComposeView` inside existing fragments, no intermediate ViewBinding step. Kotlin Compose compiler plugin 2.2.10, Compose BOM 2026.06.01, `coil-compose` 2.7.0. Lifecycle is downgraded 2.11.0 → 2.10.0 (amends D-006) because `lifecycle-runtime-compose` 2.11 requires `compileSdk 37`, unsupported by AGP 9.1.0; Dependabot must ignore Lifecycle ≥ 2.11 until `compileSdk 37`. Order: foundation and theme → match details → team details → standings → matches → Compose shell and navigation. Navigation (#18) is resolved in the last migration step; `targetSdk 36` (#45) right after the migration.
+
+**Why.**
+- ViewModels already expose `StateFlow<UiState>` and stay untouched; only ~2,500 lines of view code change.
+- Every `findViewById`, adapter and hand-built row is deleted instead of refactored twice.
+- One screen per PR keeps regressions traceable while no UI tests exist.
+- Full Compose with a visible interop migration is the strongest portfolio outcome.
+- Pinned versions were build-verified; raising `compileSdk` to 37 would drag an AGP and Kotlin upgrade into a UI task.
+- **Rejected:** big-bang rewrite (Option 3a; unreviewable PR, blocks concurrent UI work, difficult to localize regressions), ViewBinding as an intermediate step (Option 1; throws away refactoring effort once Compose arrives).
+
+**Consequences.**
+- #19 is split into six sequential issues (`agent:codex`, 1 × `size:S`, 5 × `size:M`).
+- Lifecycle goes 2.11.0 → 2.10.0, amending D-006 step 3. Dependabot gets ignore rules for `androidx.lifecycle:*` ≥ 2.11.0 (with the reason recorded) as well as Compose BOM ≥ 2026.08.00, `navigation-compose` ≥ 2.10.0, `hilt-lifecycle-viewmodel-compose` ≥ 1.4.0, and `fragment-compose` ≥ 1.9.0 until `compileSdk 37`.
+- Detekt gets a config file with the standard Compose exceptions for `FunctionNaming` and `MagicNumber`.
+- Navigation (#18) is deferred and resolved by the last migration step (step 6); its library choice must be made before step 6 starts.
+- `targetSdk 36` (#45) is scheduled right after the migration (step 6).
+- #14 runs before the screen steps or is folded into them; #13 is re-scoped to what remains after the migration.
+- AUDIT §4 item 7 (ViewBinding + ListAdapter) is rejected.
+- New follow-up issue created: "Upgrade AGP to 9.5 and compileSdk to 37" (`agent:codex`, `size:M`), scheduled after migration step 6 (removes the Lifecycle pin and Dependabot ignore rules).
+
 ## D-006: Dependency upgrades in grouped sequential steps, then Dependabot
 
 - **Date:** 2026-11-08
@@ -48,7 +88,7 @@ Statuses: `Accepted` · `Rejected` · `Superseded by D-XXX` · `Proposed` (await
 0. **compileSdk 36** (keep `targetSdk` at 35) — #38
 1. **Java 17** (`compileOptions` 11 → 17) — #39
 2. **Retrofit 3.0.0** (`retrofit` + `converter-gson` 2.9.0 → 3.0.0; `logging-interceptor` stays 4.12.0) — #40
-3. **Coroutines 1.11.0 + Lifecycle 2.11.0** — #41
+3. **Coroutines 1.11.0 + Lifecycle 2.11.0** — #41 *(amended by D-007: Lifecycle downgraded 2.11.0 → 2.10.0)*
 4. **AndroidX UI** (`core-ktx`, `activity`, `appcompat`, `material`, `constraintlayout` — latest compatible with `compileSdk 36`; test libraries `androidx.test.ext:junit`, `espresso` upgraded alongside) — #42
 5. **Coil 2.7.0** (stay on 2.x) — #43
 6. **Dependabot** (`.github/dependabot.yml` for `gradle` and `github-actions`, weekly) — #44
@@ -66,6 +106,7 @@ Room 2.6.1 stays until decided in #17. Pinned for #34: Hilt 2.59.2 and KSP 2.3.1
 - Implementation is split into sequential issues (#38–#44, `agent:codex`, `size:S` / `size:M`), each blocked by the previous step.
 - Every step requires `./gradlew assembleDebug testDebugUnitTest lintDebug` and `./gradlew assembleRelease` to verify R8/ProGuard compatibility.
 - Separate `needs-decision` issue created: #45 ("Raise targetSdk to 36", `size:M`), scheduled with #19.
+- *Note:* Lifecycle in step 3 was amended by D-007 (downgraded 2.11.0 → 2.10.0 for Compose compatibility on compileSdk 36).
 
 ## D-005: Dependency injection with Hilt, introduced in two steps
 
