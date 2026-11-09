@@ -1,5 +1,5 @@
 [versions]
-agp = "9.1.0"
+agp = "9.5.1"
 # Core 1.19.x requires compileSdk 37; 1.18.0 supports the current compileSdk 36.
 coreKtx = "1.18.0"
 junit = "4.13.2"
