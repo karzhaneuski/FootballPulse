@@ -1,0 +1,45 @@
+version: 2
+updates:
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # Major upgrades remain individual PRs for easier compatibility review.
+    groups:
+      androidx-and-material:
+        patterns:
+          - "androidx.*"
+          - "com.google.android.material:*"
+        update-types:
+          - "minor"
+          - "patch"
+      square-networking:
+        patterns:
+          - "com.squareup.*"
+        update-types:
+          - "minor"
+          - "patch"
+      coroutines:
+        patterns:
+          - "org.jetbrains.kotlinx:kotlinx-coroutines-*"
+        update-types:
+          - "minor"
+          - "patch"
+      coil:
+        patterns:
+          - "io.coil-kt:*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
