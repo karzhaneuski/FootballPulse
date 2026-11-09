@@ -1,14 +1,18 @@
 package com.artsiom.footballpulse
 
 import android.os.Bundle
+import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import com.artsiom.footballpulse.ui.matchdetails.MatchDetailsFragment
-import com.artsiom.footballpulse.ui.teamdetails.TeamDetailsFragment
 import com.artsiom.footballpulse.ui.matches.MatchesFragment
 import com.artsiom.footballpulse.ui.standings.StandingsFragment
+import com.artsiom.footballpulse.ui.teamdetails.TeamDetailsFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
@@ -32,6 +36,18 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+
+        val content = findViewById<View>(android.R.id.content)
+        ViewCompat.setOnApplyWindowInsetsListener(content) { view, insets ->
+            val bars = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+            )
+            view.updatePadding(left = bars.left, top = bars.top, right = bars.right, bottom = bars.bottom)
+            // The parent keeps both content and bottom navigation inside the bars;
+            // consuming prevents BottomNavigationView from applying the bottom inset twice.
+            WindowInsetsCompat.CONSUMED
+        }
+        ViewCompat.requestApplyInsets(content)
 
         val btnThemeToggle = findViewById<FloatingActionButton>(R.id.btnThemeToggle)
         val isNightNow = AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES
