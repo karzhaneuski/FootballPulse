@@ -20,6 +20,22 @@ updates:
       # D-006: Apply the same AGP policy to its Maven artifact; patches stay allowed.
       - dependency-name: "com.android.tools.build:gradle"
         update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      # D-007: lifecycle-runtime-compose 2.11+ requires compileSdk 37, unsupported by AGP 9.1.0.
+      # Stay on 2.10.0 until the AGP/compileSdk upgrade.
+      - dependency-name: "androidx.lifecycle:*"
+        versions: ["[2.11.0,)"]
+      # D-007: Later Compose BOMs require compileSdk 37; keep the verified 2026.06.01 BOM.
+      - dependency-name: "androidx.compose:compose-bom"
+        versions: ["[2026.08.00,)"]
+      # D-007: Navigation Compose 2.10+ requires the separate AGP/compileSdk 37 upgrade.
+      - dependency-name: "androidx.navigation:navigation-compose"
+        versions: ["[2.10.0,)"]
+      # D-007: Hilt Compose 1.4+ requires the separate AGP/compileSdk 37 upgrade.
+      - dependency-name: "androidx.hilt:hilt-lifecycle-viewmodel-compose"
+        versions: ["[1.4.0,)"]
+      # D-007: Fragment Compose 1.9+ requires the separate AGP/compileSdk 37 upgrade.
+      - dependency-name: "androidx.fragment:fragment-compose"
+        versions: ["[1.9.0,)"]
     # Major upgrades remain individual PRs for easier compatibility review.
     groups:
       androidx-and-material:
