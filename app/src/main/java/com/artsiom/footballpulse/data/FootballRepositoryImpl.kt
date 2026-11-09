@@ -9,11 +9,16 @@ import com.artsiom.footballpulse.domain.model.SquadPlayer
 import com.artsiom.footballpulse.domain.model.Standing
 import com.artsiom.footballpulse.domain.model.TeamDetails
 import com.artsiom.footballpulse.domain.repository.FootballRepository
+import java.time.Clock
 import java.time.Instant
-import java.util.Calendar
+import java.time.LocalDate
+import java.time.Month
 import kotlinx.coroutines.CancellationException
 
-class FootballRepositoryImpl(private val api: FootballApiService) : FootballRepository {
+class FootballRepositoryImpl(
+    private val api: FootballApiService,
+    private val clock: Clock = Clock.systemDefaultZone()
+) : FootballRepository {
 
     override suspend fun getCurrentMatchdayResult(leagueCode: String): MatchdayResult {
         val season = computeCurrentSeason()
@@ -159,13 +164,9 @@ class FootballRepositoryImpl(private val api: FootballApiService) : FootballRepo
     }
 
     private fun computeCurrentSeason(): Int {
-        val cal = Calendar.getInstance()
-        // European leagues start in August (month index 7)
-        return if (cal.get(Calendar.MONTH) >= 7) {
-            cal.get(Calendar.YEAR)
-        } else {
-            cal.get(Calendar.YEAR) - 1
-        }
+        val date = LocalDate.now(clock)
+        // European leagues start in August.
+        return if (date.monthValue >= Month.AUGUST.value) date.year else date.year - 1
     }
 }
 
