@@ -1,4 +1,6 @@
-%# FootballPulse ⚽
+# FootballPulse ⚽
+
+[![Android CI](https://github.com/karzhaneuski/FootballPulse/actions/workflows/android-ci.yml/badge.svg)](https://github.com/karzhaneuski/FootballPulse/actions/workflows/android-ci.yml)
 
 An Android app for browsing football matches, standings, and team info across the **Top 5 European leagues** — built as a portfolio project.
 

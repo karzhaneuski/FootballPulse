@@ -52,7 +52,8 @@ only as part of the corresponding task.
 ./gradlew assembleDebug        # build debug APK
 ./gradlew testDebugUnitTest    # unit tests
 ./gradlew lintDebug            # Android Lint (errors fail the build, warnings do not)
-./gradlew assembleDebug testDebugUnitTest lintDebug   # same as in CI
+./gradlew detekt               # Kotlin static analysis (existing findings are baselined)
+./gradlew assembleDebug testDebugUnitTest lintDebug detekt   # same as in CI
 ```
 
 Always run the CI command locally before opening a PR. Requires the Android SDK (`ANDROID_HOME` or `sdk.dir`

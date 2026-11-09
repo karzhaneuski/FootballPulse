@@ -1,0 +1,72 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:StandingsAdapter.kt$StandingsAdapter$private fun bindRow(holder: StandingViewHolder, standing: Standing)</ID>
+    <ID>CyclomaticComplexMethod:TeamDetailsFragment.kt$TeamDetailsFragment$private fun countryFlag(nationality: String?): String</ID>
+    <ID>InstanceOfCheckForException:FootballRepositoryImpl.kt$FootballRepositoryImpl$e is CancellationException</ID>
+    <ID>InstanceOfCheckForException:MatchDetailsViewModel.kt$MatchDetailsViewModel$e is CancellationException</ID>
+    <ID>InstanceOfCheckForException:MatchesViewModel.kt$MatchesViewModel$e is CancellationException</ID>
+    <ID>InstanceOfCheckForException:StandingsViewModel.kt$StandingsViewModel$e is CancellationException</ID>
+    <ID>InstanceOfCheckForException:TeamDetailsViewModel.kt$TeamDetailsViewModel$e is CancellationException</ID>
+    <ID>LongMethod:MatchesFragment.kt$MatchesFragment$override fun onViewCreated(view: View, savedInstanceState: Bundle?)</ID>
+    <ID>LongMethod:StandingsFragment.kt$StandingsFragment$override fun onViewCreated(view: View, savedInstanceState: Bundle?)</ID>
+    <ID>LongParameterList:MatchDetailsFragment.kt$MatchDetailsFragment$( context: android.content.Context, density: Float, hPad: Int, vPad: Int, label: String, homeScore: Any, awayScore: Any )</ID>
+    <ID>LongParameterList:MatchDetailsFragment.kt$MatchDetailsFragment$( match: MatchDetail, homeTeamName: TextView, awayTeamName: TextView, homeTeamCrest: ImageView, awayTeamCrest: ImageView, scoreOrTime: TextView, matchDate: TextView, matchStatus: TextView, scoreContainer: LinearLayout )</ID>
+    <ID>LongParameterList:TeamDetailsFragment.kt$TeamDetailsFragment$( team: TeamDetails, crestView: ImageView, nameView: TextView, shortNameView: TextView, infoContainer: LinearLayout, infoCard: View, squadCard: View, squadContainer: LinearLayout )</ID>
+    <ID>LoopWithTooManyJumpStatements:FootballRepositoryImpl.kt$for</ID>
+    <ID>MagicNumber:FootballRepositoryImpl.kt$5</ID>
+    <ID>MagicNumber:FootballRepositoryImpl.kt$FootballRepositoryImpl$7</ID>
+    <ID>MagicNumber:LeaguesAdapter.kt$LeaguesAdapter$20f</ID>
+    <ID>MagicNumber:MatchDetailsFragment.kt$MatchDetailsFragment$0.5f</ID>
+    <ID>MagicNumber:MatchDetailsFragment.kt$MatchDetailsFragment$10</ID>
+    <ID>MagicNumber:MatchDetailsFragment.kt$MatchDetailsFragment$12</ID>
+    <ID>MagicNumber:MatchDetailsFragment.kt$MatchDetailsFragment$13f</ID>
+    <ID>MagicNumber:MatchDetailsFragment.kt$MatchDetailsFragment$14f</ID>
+    <ID>MagicNumber:MatchDetailsFragment.kt$MatchDetailsFragment$28</ID>
+    <ID>MagicNumber:MatchDetailsFragment.kt$MatchDetailsFragment$4f</ID>
+    <ID>MagicNumber:MatchesAdapter.kt$MatchesAdapter.MatchCardViewHolder$4f</ID>
+    <ID>MagicNumber:MatchesFragment.kt$MatchesFragment$0.3f</ID>
+    <ID>MagicNumber:MatchesFragment.kt$MatchesFragment$38</ID>
+    <ID>MagicNumber:MatchesViewModel.kt$MatchesViewModel$2025</ID>
+    <ID>MagicNumber:MatchesViewModel.kt$MatchesViewModel$34</ID>
+    <ID>MagicNumber:MatchesViewModel.kt$MatchesViewModel$38</ID>
+    <ID>MagicNumber:StandingsAdapter.kt$StandingsAdapter$11f</ID>
+    <ID>MagicNumber:StandingsAdapter.kt$StandingsAdapter$14f</ID>
+    <ID>MagicNumber:StandingsAdapter.kt$StandingsAdapter$28</ID>
+    <ID>MagicNumber:StandingsAdapter.kt$StandingsAdapter$3</ID>
+    <ID>MagicNumber:StandingsFragment.kt$StandingsFragment$20f</ID>
+    <ID>MagicNumber:TeamDetailsFragment.kt$TeamDetailsFragment$10</ID>
+    <ID>MagicNumber:TeamDetailsFragment.kt$TeamDetailsFragment$12</ID>
+    <ID>MagicNumber:TeamDetailsFragment.kt$TeamDetailsFragment$12f</ID>
+    <ID>MagicNumber:TeamDetailsFragment.kt$TeamDetailsFragment$13f</ID>
+    <ID>MagicNumber:TeamDetailsFragment.kt$TeamDetailsFragment$14f</ID>
+    <ID>MagicNumber:TeamDetailsFragment.kt$TeamDetailsFragment$28</ID>
+    <ID>MagicNumber:TeamDetailsFragment.kt$TeamDetailsFragment$32</ID>
+    <ID>MagicNumber:TeamDetailsFragment.kt$TeamDetailsFragment$4</ID>
+    <ID>MagicNumber:TeamDetailsFragment.kt$TeamDetailsFragment$8</ID>
+    <ID>MaxLineLength:CrestImageLoaderTest.kt$CrestImageLoaderTest$"image/svg+xml" to """&lt;svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"&gt;&lt;rect width="32" height="32" fill="red"/&gt;&lt;/svg&gt;""".toByteArray()</ID>
+    <ID>MaxLineLength:LeaguesAdapter.kt$LeaguesAdapter$class</ID>
+    <ID>MaxLineLength:StandingsAdapter.kt$StandingsAdapter$holder.tvPoints.apply { text = standing.points.toString(); setTextColor(defaultColor); setTypeface(null, Typeface.BOLD) }</ID>
+    <ID>MaxLineLength:StandingsAdapter.kt$StandingsAdapter$holder.tvPosition.apply { text = standing.position.toString(); setTextColor(defaultColor); setTypeface(null, Typeface.NORMAL) }</ID>
+    <ID>MaxLineLength:StandingsAdapter.kt$StandingsAdapter$holder.tvTeamName.apply { text = standing.teamName; setTextColor(defaultColor); setTypeface(null, Typeface.NORMAL) }</ID>
+    <ID>NewLineAtEndOfFile:ExampleInstrumentedTest.kt$com.artsiom.footballpulse.ExampleInstrumentedTest.kt</ID>
+    <ID>NewLineAtEndOfFile:ExampleUnitTest.kt$com.artsiom.footballpulse.ExampleUnitTest.kt</ID>
+    <ID>NewLineAtEndOfFile:FootballApiService.kt$com.artsiom.footballpulse.data.remote.FootballApiService.kt</ID>
+    <ID>NewLineAtEndOfFile:MatchesUiState.kt$com.artsiom.footballpulse.ui.matches.MatchesUiState.kt</ID>
+    <ID>NewLineAtEndOfFile:RetrofitInstance.kt$com.artsiom.footballpulse.data.remote.RetrofitInstance.kt</ID>
+    <ID>NewLineAtEndOfFile:Standing.kt$com.artsiom.footballpulse.domain.model.Standing.kt</ID>
+    <ID>ReturnCount:TeamDetailsFragment.kt$TeamDetailsFragment$private fun calculateAge(dateOfBirth: String?): Int?</ID>
+    <ID>TooGenericExceptionCaught:FootballRepositoryImpl.kt$FootballRepositoryImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:MatchDetailsViewModel.kt$MatchDetailsViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:MatchesViewModel.kt$MatchesViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:StandingsViewModel.kt$StandingsViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:TeamDetailsViewModel.kt$TeamDetailsViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionThrown:FootballRepositoryImpl.kt$FootballRepositoryImpl$throw Exception("Empty response")</ID>
+    <ID>TooGenericExceptionThrown:FootballRepositoryImpl.kt$FootballRepositoryImpl$throw Exception("HTTP ${response.code()}: ${response.message()}")</ID>
+    <ID>TooGenericExceptionThrown:FootballRepositoryImpl.kt$FootballRepositoryImpl$throw Exception("HTTP ${standingsResponse.code()}: ${standingsResponse.message()}")</ID>
+    <ID>UseCheckOrError:FootballRepositoryInjectionTest.kt$FootballRepositoryInjectionTest.&lt;no name provided&gt;$throw IllegalStateException("Offline")</ID>
+    <ID>WildcardImport:ExampleInstrumentedTest.kt$import org.junit.Assert.*</ID>
+    <ID>WildcardImport:ExampleUnitTest.kt$import org.junit.Assert.*</ID>
+  </CurrentIssues>
+</SmellBaseline>

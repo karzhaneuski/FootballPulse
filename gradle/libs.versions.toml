@@ -16,6 +16,7 @@ lifecycle = "2.7.0"
 room = "2.6.1"
 coil = "2.6.0"
 hilt = "2.50"
+detekt = "1.23.8"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -42,3 +43,4 @@ coil-svg = { group = "io.coil-kt", name = "coil-svg", version.ref = "coil" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
