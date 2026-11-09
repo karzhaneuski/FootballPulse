@@ -34,7 +34,7 @@ jobs:
         # when the secret is missing (e.g. PRs from forks), the build falls back to an empty key.
         env:
           FOOTBALL_API_KEY: ${{ secrets.FOOTBALL_API_KEY }}
-        run: ./gradlew assembleDebug testDebugUnitTest lintDebug detekt --stacktrace
+        run: ./gradlew assembleDebug assembleRelease testDebugUnitTest lintDebug detekt --stacktrace
 
       - name: Upload reports
         if: always()
