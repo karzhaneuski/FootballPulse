@@ -59,7 +59,7 @@ class LeaguesAdapter(private val onLeagueClick: (League) -> Unit) : RecyclerView
 
         holder.leagueName.setOnClickListener {
             val previous = selectedPosition
-            selectedPosition = holder.adapterPosition
+            selectedPosition = holder.bindingAdapterPosition
             notifyItemChanged(previous)
             notifyItemChanged(selectedPosition)
             onLeagueClick(league)
