@@ -14,6 +14,7 @@ val footballApiKey: String =
 
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.detekt)
 }
 
 android {
@@ -72,4 +73,10 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+}
+
+detekt {
+    source.from("src/androidTest/java", "src/androidTest/kotlin")
+    baseline = rootProject.file("config/detekt/baseline.xml")
+    basePath = rootProject.projectDir.absolutePath
 }
