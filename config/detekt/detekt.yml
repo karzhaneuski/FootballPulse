@@ -1,0 +1,6 @@
+naming:
+  FunctionNaming:
+    ignoreAnnotated: ['Composable', 'Preview']
+style:
+  MagicNumber:
+    ignoreAnnotated: ['Composable', 'Preview']
