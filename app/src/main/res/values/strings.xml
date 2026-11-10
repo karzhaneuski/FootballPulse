@@ -28,4 +28,22 @@
     <string name="team_details_club_info">Club Info</string>
     <string name="team_details_squad">Squad</string>
     <string name="team_details_preview_error">Unable to load team</string>
+    <string name="standings_full">Full</string>
+    <string name="standings_short">Short</string>
+    <string name="standings_form">Form</string>
+    <string name="standings_rank">#</string>
+    <string name="standings_team">Team</string>
+    <string name="standings_played">MP</string>
+    <string name="standings_won">W</string>
+    <string name="standings_drawn">D</string>
+    <string name="standings_lost">L</string>
+    <string name="standings_goals">GF:GA</string>
+    <string name="standings_goal_difference">GD</string>
+    <string name="standings_points">Pts</string>
+    <string name="standings_legend_marker">"● "</string>
+    <string name="standings_legend_separator">"  "</string>
+    <string name="standings_form_win">W</string>
+    <string name="standings_form_draw">D</string>
+    <string name="standings_form_loss">L</string>
+    <string name="standings_preview_error">Unable to load standings</string>
 </resources>

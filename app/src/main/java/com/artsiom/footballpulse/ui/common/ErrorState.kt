@@ -28,11 +28,12 @@ fun ErrorState(
     message: String,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
-    retryButtonMinWidth: Dp = ButtonDefaults.MinWidth
+    retryButtonMinWidth: Dp = ButtonDefaults.MinWidth,
+    spacing: Dp = 16.dp
 ) {
     Column(
         modifier = modifier.fillMaxSize().padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+        verticalArrangement = Arrangement.spacedBy(spacing, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(message, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
