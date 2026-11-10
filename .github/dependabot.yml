@@ -5,7 +5,7 @@ updates:
     schedule:
       interval: "weekly"
     ignore:
-      # D-005/D-006/D-008: Dagger artifacts and the Hilt plugin must stay <= 2.59.2.
+      # D-005/D-006: Dagger artifacts and the Hilt plugin must stay <= 2.59.2.
       # AGP 9.5.1 still bundles Kotlin 2.2.10, while Hilt 2.60+ is built against Kotlin 2.3.21;
       # lift this rule once an AGP release bundles Kotlin >= 2.3.21.
       - dependency-name: "com.google.dagger*"
