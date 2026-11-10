@@ -22,6 +22,25 @@ class MatchesViewModelTest : ViewModelTest() {
     private val repository = FakeFootballRepository()
 
     @Test
+    fun `navigation state respects loading and configured league boundaries`() = runTest {
+        val vm = own(MatchesViewModel(repository))
+        runCurrent()
+        assertFalse(vm.navigation.value.previousEnabled)
+        assertFalse(vm.navigation.value.nextEnabled)
+        repository.leagues.single().result.complete(MatchdayResult(1, 2025, emptyList()))
+        runCurrent()
+        assertFalse(vm.navigation.value.previousEnabled)
+        assertTrue(vm.navigation.value.nextEnabled)
+        vm.loadLeague("BL1")
+        runCurrent()
+        assertFalse(vm.navigation.value.nextEnabled)
+        repository.leagues.last().result.complete(MatchdayResult(34, 2025, emptyList()))
+        runCurrent()
+        assertTrue(vm.navigation.value.previousEnabled)
+        assertFalse(vm.navigation.value.nextEnabled)
+    }
+
+    @Test
     fun `initial load publishes loading then matches and selected matchday`() = runTest {
         val vm = own(MatchesViewModel(repository))
         val states = record(vm.uiState)

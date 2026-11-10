@@ -1,4 +1,23 @@
 <resources>
     <string name="app_name">FootballPulse</string>
     <string name="retry">Retry</string>
+    <string name="unknown_date">Unknown Date</string>
+    <string name="first_half">First Half</string>
+    <string name="full_time">Full Time</string>
+    <string name="match_not_started">Match not started yet</string>
+    <string name="goalkeepers">Goalkeepers</string>
+    <string name="defenders">Defenders</string>
+    <string name="midfielders">Midfielders</string>
+    <string name="forwards">Forwards</string>
+    <string name="founded">Founded</string>
+    <string name="venue">Venue</string>
+    <string name="club_colors">Colors</string>
+    <string name="matchday_format">Matchday %1$d</string>
+    <string name="zone_ucl">UCL</string>
+    <string name="zone_uel">UEL</string>
+    <string name="zone_uecl">UECL</string>
+    <string name="zone_relegation">Relegation</string>
+    <string name="zone_playoff">Playoff</string>
+    <string name="standings_legend">UCL · UEL · UECL · Relegation · Playoff</string>
+    <string name="standings_places_note">Actual places may differ due to cup winners and UEFA European Performance Spots.</string>
 </resources>

@@ -22,10 +22,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import coil.load
 import com.artsiom.footballpulse.FootballPulseApp
 import com.artsiom.footballpulse.R
-import com.artsiom.footballpulse.domain.model.MatchDetail
-import java.text.SimpleDateFormat
-import java.util.Locale
-import java.util.TimeZone
+import com.artsiom.footballpulse.ui.presentation.MatchStatusStyle
 import kotlinx.coroutines.launch
 
 class MatchDetailsFragment : Fragment() {
@@ -41,11 +38,7 @@ class MatchDetailsFragment : Fragment() {
             return fragment
         }
 
-        private val INPUT_FORMAT = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault()).apply {
-            timeZone = TimeZone.getTimeZone("UTC")
-        }
-        private val DATE_FORMAT = SimpleDateFormat("d MMMM yyyy", Locale.ENGLISH)
-        private val TIME_FORMAT = SimpleDateFormat("HH:mm", Locale.getDefault())
+
     }
 
     override fun onCreateView(
@@ -69,14 +62,7 @@ class MatchDetailsFragment : Fragment() {
         val contentLayout = view.findViewById<View>(R.id.contentLayout)
         val btnBack = view.findViewById<TextView>(R.id.btnBack)
 
-        val homeTeamName = view.findViewById<TextView>(R.id.homeTeamName)
-        val awayTeamName = view.findViewById<TextView>(R.id.awayTeamName)
-        val homeTeamCrest = view.findViewById<ImageView>(R.id.homeTeamCrest)
-        val awayTeamCrest = view.findViewById<ImageView>(R.id.awayTeamCrest)
-        val scoreOrTime = view.findViewById<TextView>(R.id.scoreOrTime)
-        val matchDate = view.findViewById<TextView>(R.id.matchDate)
-        val matchStatus = view.findViewById<TextView>(R.id.matchStatus)
-        val scoreContainer = view.findViewById<LinearLayout>(R.id.scoreContainer)
+        val binding = MatchDetailsViews(view)
 
         btnBack.setOnClickListener {
             requireActivity().supportFragmentManager.popBackStack()
@@ -103,12 +89,7 @@ class MatchDetailsFragment : Fragment() {
                             progressBar.visibility = View.GONE
                             errorLayout.visibility = View.GONE
                             contentLayout.visibility = View.VISIBLE
-                            bindMatch(
-                                state.match,
-                                homeTeamName, awayTeamName, homeTeamCrest, awayTeamCrest,
-                                scoreOrTime, matchDate, matchStatus,
-                                scoreContainer
-                            )
+                            bindMatch(state.content, binding)
                         }
                     }
                 }
@@ -116,17 +97,8 @@ class MatchDetailsFragment : Fragment() {
         }
     }
 
-    private fun bindMatch(
-        match: MatchDetail,
-        homeTeamName: TextView,
-        awayTeamName: TextView,
-        homeTeamCrest: ImageView,
-        awayTeamCrest: ImageView,
-        scoreOrTime: TextView,
-        matchDate: TextView,
-        matchStatus: TextView,
-        scoreContainer: LinearLayout
-    ) {
+    private fun bindMatch(model: MatchDetailsUiModel, binding: MatchDetailsViews) = with(binding) {
+        val match = model.match
         homeTeamName.text = match.homeTeam
         awayTeamName.text = match.awayTeam
 
@@ -141,27 +113,19 @@ class MatchDetailsFragment : Fragment() {
             error(R.drawable.ic_placeholder_crest)
         }
 
-        val parsedDate = try { INPUT_FORMAT.parse(match.date) } catch (_: Exception) { null }
-
-        scoreOrTime.text = when {
-            match.homeScore != null && match.awayScore != null ->
-                "${match.homeScore} - ${match.awayScore}"
-            parsedDate != null -> TIME_FORMAT.format(parsedDate)
-            else -> "- : -"
-        }
-
-        matchDate.text = if (parsedDate != null) DATE_FORMAT.format(parsedDate) else match.date
+        scoreOrTime.text = model.scoreOrTime
+        matchDate.text = model.dateLabel
 
         matchStatus.text = match.status
         val context = requireContext()
         val density = context.resources.displayMetrics.density
         val bgDrawable = GradientDrawable().apply { cornerRadius = 4f * density }
-        when (match.status.uppercase()) {
-            "FINISHED" -> {
+        when (model.statusStyle) {
+            MatchStatusStyle.FINISHED -> {
                 bgDrawable.setColor(ContextCompat.getColor(context, R.color.color_status_finished_bg))
                 matchStatus.setTextColor(ContextCompat.getColor(context, R.color.color_status_finished_text))
             }
-            "IN_PLAY", "LIVE", "PAUSED" -> {
+            MatchStatusStyle.LIVE -> {
                 bgDrawable.setColor(ContextCompat.getColor(context, R.color.color_status_live_bg))
                 matchStatus.setTextColor(ContextCompat.getColor(context, android.R.color.white))
             }
@@ -172,20 +136,18 @@ class MatchDetailsFragment : Fragment() {
         }
         matchStatus.background = bgDrawable
 
-        populateScoreRows(scoreContainer, match)
+        populateScoreRows(scoreContainer, model)
     }
 
-    private fun populateScoreRows(container: LinearLayout, match: MatchDetail) {
+    private fun populateScoreRows(container: LinearLayout, model: MatchDetailsUiModel) {
         container.removeAllViews()
         val context = requireContext()
         val density = context.resources.displayMetrics.density
-        val hPad = (12 * density).toInt()
         val vPad = (10 * density).toInt()
 
-        val statusUpper = match.status.uppercase()
-        if (statusUpper == "SCHEDULED" || statusUpper == "TIMED") {
+        if (model.notStarted) {
             val tv = TextView(context)
-            tv.text = "Match not started yet"
+            tv.setText(R.string.match_not_started)
             tv.gravity = Gravity.CENTER
             tv.textSize = 13f
             tv.setTextColor(ContextCompat.getColor(context, R.color.color_text_secondary))
@@ -199,35 +161,30 @@ class MatchDetailsFragment : Fragment() {
             return
         }
 
-        val halfHome = match.halfTimeHome
-        val halfAway = match.halfTimeAway
-        if (halfHome != null && halfAway != null) {
-            container.addView(buildScoreRow(context, density, hPad, vPad, "First Half", halfHome, halfAway))
-            val divider = View(context)
-            divider.layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                1.coerceAtLeast((0.5f * density).toInt())
-            )
-            divider.setBackgroundColor(ContextCompat.getColor(context, R.color.color_divider))
-            container.addView(divider)
+        model.scores.forEachIndexed { index, score ->
+            if (index > 0) {
+                val divider = View(context)
+                divider.layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    1.coerceAtLeast((0.5f * density).toInt())
+                )
+                divider.setBackgroundColor(ContextCompat.getColor(context, R.color.color_divider))
+                container.addView(divider)
+            }
+            container.addView(buildScoreRow(context, density, score))
         }
-
-        val ftHome = match.fullTimeHome
-        val ftAway = match.fullTimeAway
-        val homeDisplay = ftHome?.toString() ?: "-"
-        val awayDisplay = ftAway?.toString() ?: "-"
-        container.addView(buildScoreRow(context, density, hPad, vPad, "Full Time", homeDisplay, awayDisplay))
     }
 
     private fun buildScoreRow(
         context: android.content.Context,
         density: Float,
-        hPad: Int,
-        vPad: Int,
-        label: String,
-        homeScore: Any,
-        awayScore: Any
+        score: ScoreRowUiModel
     ): LinearLayout {
+        val hPad = (12 * density).toInt()
+        val vPad = (10 * density).toInt()
+        val label = getString(score.label)
+        val homeScore = score.home
+        val awayScore = score.away
         val row = LinearLayout(context)
         row.orientation = LinearLayout.HORIZONTAL
         row.gravity = Gravity.CENTER_VERTICAL
@@ -241,7 +198,7 @@ class MatchDetailsFragment : Fragment() {
         row.addView(labelTv)
 
         val homeTv = TextView(context)
-        homeTv.text = homeScore.toString()
+        homeTv.text = homeScore
         homeTv.textSize = 14f
         homeTv.setTypeface(null, android.graphics.Typeface.BOLD)
         homeTv.gravity = Gravity.END
@@ -255,7 +212,7 @@ class MatchDetailsFragment : Fragment() {
         row.addView(dashTv)
 
         val awayTv = TextView(context)
-        awayTv.text = awayScore.toString()
+        awayTv.text = awayScore
         awayTv.textSize = 14f
         awayTv.setTypeface(null, android.graphics.Typeface.BOLD)
         awayTv.gravity = Gravity.START
@@ -263,5 +220,16 @@ class MatchDetailsFragment : Fragment() {
         row.addView(awayTv)
 
         return row
+    }
+
+    private class MatchDetailsViews(view: View) {
+        val homeTeamName = view.findViewById<TextView>(R.id.homeTeamName)
+        val awayTeamName = view.findViewById<TextView>(R.id.awayTeamName)
+        val homeTeamCrest = view.findViewById<ImageView>(R.id.homeTeamCrest)
+        val awayTeamCrest = view.findViewById<ImageView>(R.id.awayTeamCrest)
+        val scoreOrTime = view.findViewById<TextView>(R.id.scoreOrTime)
+        val matchDate = view.findViewById<TextView>(R.id.matchDate)
+        val matchStatus = view.findViewById<TextView>(R.id.matchStatus)
+        val scoreContainer = view.findViewById<LinearLayout>(R.id.scoreContainer)
     }
 }

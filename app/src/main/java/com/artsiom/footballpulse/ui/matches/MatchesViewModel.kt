@@ -3,11 +3,15 @@ package com.artsiom.footballpulse.ui.matches
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.artsiom.footballpulse.domain.model.Leagues
+import com.artsiom.footballpulse.domain.model.FootballSeason
 import com.artsiom.footballpulse.domain.repository.FootballRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class MatchesViewModel(
@@ -21,23 +25,25 @@ class MatchesViewModel(
 
     val leagues = Leagues.ALL
 
-    val leagueMaxMatchdays = mapOf(
-        "PL"  to 38,
-        "PD"  to 38,
-        "BL1" to 34,
-        "FL1" to 34,
-        "SA"  to 38
-    )
-
     private val _currentMatchday = MutableStateFlow(1)
     val currentMatchday: StateFlow<Int> = _currentMatchday
 
     private val _currentLeagueCode = MutableStateFlow("PL")
     val currentLeagueCode: StateFlow<String> = _currentLeagueCode
 
+    val navigation: StateFlow<MatchdayNavigation> = combine(
+        _currentMatchday, _currentLeagueCode, _uiState
+    ) { matchday, code, state ->
+        MatchdayNavigation(
+            matchday = matchday,
+            previousEnabled = state !is MatchesUiState.Loading && matchday > 1,
+            nextEnabled = state !is MatchesUiState.Loading && matchday < Leagues.forCode(code).maxMatchdays
+        )
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, MatchdayNavigation(1, false, false))
+
     private var lastRequest: (() -> Unit)? = null
 
-    private var currentSeason: Int = 2025 // updated on first successful load
+    private var currentSeason: Int = FootballSeason.current() // replaced by the loaded season on success
 
     init {
         loadLeague("PL")
@@ -75,7 +81,7 @@ class MatchesViewModel(
     }
 
     fun goToNextMatchday() {
-        val max = leagueMaxMatchdays[_currentLeagueCode.value] ?: 38
+        val max = Leagues.forCode(_currentLeagueCode.value).maxMatchdays
         val next = (_currentMatchday.value + 1).coerceAtMost(max)
         if (next != _currentMatchday.value) {
             _currentMatchday.value = next
@@ -104,3 +110,5 @@ class MatchesViewModel(
         }
     }
 }
+
+data class MatchdayNavigation(val matchday: Int, val previousEnabled: Boolean, val nextEnabled: Boolean)
