@@ -24,4 +24,8 @@
     <string name="match_details_score">Score</string>
     <string name="match_details_score_separator">"  -  "</string>
     <string name="match_details_preview_error">Unable to load match</string>
+    <string name="team_details_back">← Back</string>
+    <string name="team_details_club_info">Club Info</string>
+    <string name="team_details_squad">Squad</string>
+    <string name="team_details_preview_error">Unable to load team</string>
 </resources>
