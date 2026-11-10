@@ -17,7 +17,7 @@ coil = "2.7.0"
 hilt = "2.50"
 detekt = "1.23.8"
 # Must match the Kotlin compiler bundled in AGP 9.1.0.
-composeCompiler = "2.2.10"
+composeCompiler = "2.4.21"
 composeBom = "2026.06.01"
 # D-007: Navigation Compose 2.10+ requires compileSdk 37.
 navigationCompose = "2.9.8"
