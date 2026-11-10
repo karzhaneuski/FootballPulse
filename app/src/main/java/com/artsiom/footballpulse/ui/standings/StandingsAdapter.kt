@@ -14,13 +14,14 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.artsiom.footballpulse.R
-import com.artsiom.footballpulse.domain.model.Standing
+import com.artsiom.footballpulse.domain.model.LeagueZone
+import com.artsiom.footballpulse.ui.presentation.FormResult
 
 class StandingsAdapter(
     private val onTeamClick: (teamId: Int) -> Unit = {}
 ) : RecyclerView.Adapter<StandingsAdapter.StandingViewHolder>() {
 
-    private var standings: List<Standing> = emptyList()
+    private var standings: List<StandingUiModel> = emptyList()
 
     var mode: ViewMode = ViewMode.FULL
         set(value) {
@@ -28,7 +29,7 @@ class StandingsAdapter(
             notifyDataSetChanged()
         }
 
-    fun submitList(list: List<Standing>) {
+    fun submitList(list: List<StandingUiModel>) {
         standings = list
         notifyDataSetChanged()
     }
@@ -36,10 +37,6 @@ class StandingsAdapter(
     companion object {
         private const val TYPE_HEADER = 0
         private const val TYPE_ROW = 1
-        private const val CHAMPIONS_LEAGUE_SPOTS = 4
-        private const val EUROPA_LEAGUE_POSITION = 5
-        private const val RELEGATION_ZONE_SIZE = 3
-        private const val FORM_WINDOW = 5
     }
 
     override fun getItemViewType(position: Int) = if (position == 0) TYPE_HEADER else TYPE_ROW
@@ -143,7 +140,8 @@ class StandingsAdapter(
         }
     }
 
-    private fun bindRow(holder: StandingViewHolder, standing: Standing) {
+    private fun bindRow(holder: StandingViewHolder, row: StandingUiModel) {
+        val standing = row.standing
         val ctx = holder.itemView.context
         applyModeVisibility(holder)
         holder.itemView.setOnClickListener { onTeamClick(standing.teamId) }
@@ -157,20 +155,12 @@ class StandingsAdapter(
         holder.itemView.setBackgroundColor(rowBg)
 
         // Left border by competition zone
-        val borderColor = when {
-            standing.position <= CHAMPIONS_LEAGUE_SPOTS ->
-                ContextCompat.getColor(ctx, R.color.color_standings_cl_border)
-            standing.position == EUROPA_LEAGUE_POSITION ->
-                ContextCompat.getColor(ctx, R.color.color_standings_el_border)
-            standing.position > standings.size - RELEGATION_ZONE_SIZE ->
-                ContextCompat.getColor(ctx, R.color.color_standings_rel_border)
-            else -> Color.TRANSPARENT
-        }
+        val borderColor = standingsZoneColor(ctx, row.zone)
         holder.leftBorder.setBackgroundColor(borderColor)
 
         val defaultColor = ContextCompat.getColor(ctx, R.color.color_text_primary)
 
-        holder.tvPosition.apply { text = standing.position.toString(); setTextColor(defaultColor); setTypeface(null, Typeface.NORMAL) }
+        holder.tvPosition.apply { text = row.position; setTextColor(defaultColor); setTypeface(null, Typeface.NORMAL) }
         holder.imgTeamCrest.visibility = View.VISIBLE
         holder.imgTeamCrest.load(standing.crest) {
             crossfade(true)
@@ -178,51 +168,39 @@ class StandingsAdapter(
             error(R.drawable.ic_placeholder_crest)
         }
         holder.tvTeamName.apply { text = standing.teamName; setTextColor(defaultColor); setTypeface(null, Typeface.NORMAL) }
-        holder.tvPoints.apply { text = standing.points.toString(); setTextColor(defaultColor); setTypeface(null, Typeface.BOLD) }
+        holder.tvPoints.apply { text = row.points; setTextColor(defaultColor); setTypeface(null, Typeface.BOLD) }
 
+        bindStatistics(holder, row, defaultColor)
+    }
+
+    private fun bindStatistics(holder: StandingViewHolder, row: StandingUiModel, defaultColor: Int) {
         when (mode) {
             ViewMode.FULL -> {
-                holder.tvMp.apply { text = standing.playedGames.toString(); setTextColor(defaultColor) }
-                holder.tvWins.apply { text = standing.won.toString(); setTextColor(defaultColor) }
-                holder.tvDraws.apply { text = standing.draw.toString(); setTextColor(defaultColor) }
-                holder.tvLosses.apply { text = standing.lost.toString(); setTextColor(defaultColor) }
+                holder.tvMp.apply { text = row.playedGames; setTextColor(defaultColor) }
+                holder.tvWins.apply { text = row.won; setTextColor(defaultColor) }
+                holder.tvDraws.apply { text = row.draw; setTextColor(defaultColor) }
+                holder.tvLosses.apply { text = row.lost; setTextColor(defaultColor) }
                 holder.tvGoals.apply {
-                    text = "${standing.goalsFor}:${standing.goalsAgainst}"
+                    text = row.goals
                     setTextColor(defaultColor)
                 }
             }
             ViewMode.SHORT -> {
-                holder.tvMp.apply { text = standing.playedGames.toString(); setTextColor(defaultColor) }
-                val gd = standing.goalDifference
+                holder.tvMp.apply { text = row.playedGames; setTextColor(defaultColor) }
                 holder.tvGD.apply {
-                    text = if (gd > 0) "+$gd" else gd.toString()
+                    text = row.goalDifference
                     setTextColor(defaultColor)
                 }
             }
             ViewMode.FORM -> {
-                buildFormBadges(holder, standing)
+                buildFormBadges(holder, row.form)
             }
         }
     }
 
-    private fun buildFormBadges(holder: StandingViewHolder, standing: Standing) {
+    private fun buildFormBadges(holder: StandingViewHolder, results: List<FormResult?>) {
         val ctx = holder.itemView.context
         holder.formContainer.removeAllViews()
-
-        // football-data.org returns form as a run of characters e.g. "WDLWW" (no commas).
-        // Defensively strip any commas so both "WDLWW" and "W,D,L,W,W" work.
-        val results = standing.form
-            ?.replace(",", "")
-            ?.map { it.toString() }
-            ?.filter { it in setOf("W", "D", "L") }
-            ?.takeLast(FORM_WINDOW)
-            ?: emptyList()
-
-        // Pad to exactly FORM_WINDOW slots so the column width is always consistent
-        val paddedResults = buildList {
-            repeat(FORM_WINDOW - results.size) { add("") }
-            addAll(results)
-        }
 
         val density = ctx.resources.displayMetrics.density
         val badgeSize = (28 * density).toInt()
@@ -231,9 +209,9 @@ class StandingsAdapter(
         // shadowing GradientDrawable.cornerRadius inside the apply{} block below.
         val badgeCornerRadius = 14f * density
 
-        paddedResults.forEachIndexed { index, result ->
+        results.forEachIndexed { index, result ->
             val params = LinearLayout.LayoutParams(badgeSize, badgeSize).apply {
-                if (index < paddedResults.lastIndex) marginEnd = badgeGap
+                if (index < results.lastIndex) marginEnd = badgeGap
             }
             val badge = TextView(ctx).apply {
                 layoutParams = params
@@ -243,12 +221,12 @@ class StandingsAdapter(
                 setTypeface(null, Typeface.BOLD)
             }
 
-            if (result.isEmpty()) {
+            if (result == null) {
                 badge.visibility = View.INVISIBLE
             } else {
                 val bgColor = when (result) {
-                    "W" -> ContextCompat.getColor(ctx, R.color.color_form_win_bg)
-                    "D" -> ContextCompat.getColor(ctx, R.color.color_form_draw_bg)
+                    FormResult.WIN -> ContextCompat.getColor(ctx, R.color.color_form_win_bg)
+                    FormResult.DRAW -> ContextCompat.getColor(ctx, R.color.color_form_draw_bg)
                     else -> ContextCompat.getColor(ctx, R.color.color_form_loss_bg)
                 }
                 badge.background = GradientDrawable().apply {
@@ -258,10 +236,19 @@ class StandingsAdapter(
                     cornerRadius = badgeCornerRadius
                     setColor(bgColor)
                 }
-                badge.text = result
+                badge.text = result.label
             }
 
             holder.formContainer.addView(badge)
         }
     }
+}
+
+internal fun standingsZoneColor(ctx: android.content.Context, zone: LeagueZone): Int = when (zone) {
+    LeagueZone.UCL -> ContextCompat.getColor(ctx, R.color.color_standings_cl_border)
+    LeagueZone.UEL -> ContextCompat.getColor(ctx, R.color.color_standings_el_border)
+    LeagueZone.PLAYOFF -> ContextCompat.getColor(ctx, R.color.color_form_draw_bg)
+    LeagueZone.UECL -> ContextCompat.getColor(ctx, R.color.color_form_win_bg)
+    LeagueZone.RELEGATION -> ContextCompat.getColor(ctx, R.color.color_standings_rel_border)
+    LeagueZone.NONE -> Color.TRANSPARENT
 }

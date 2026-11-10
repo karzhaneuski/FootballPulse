@@ -11,7 +11,10 @@ import kotlinx.coroutines.launch
 
 sealed interface TeamDetailsUiState {
     object Loading : TeamDetailsUiState
-    data class Success(val team: TeamDetails) : TeamDetailsUiState
+    data class Success(
+        val team: TeamDetails,
+        val content: TeamDetailsUiModel = mapTeamDetails(team)
+    ) : TeamDetailsUiState
     data class Error(val message: String) : TeamDetailsUiState
 }
 

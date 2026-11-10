@@ -22,11 +22,6 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import coil.load
 import com.artsiom.footballpulse.FootballPulseApp
 import com.artsiom.footballpulse.R
-import com.artsiom.footballpulse.domain.model.SquadPlayer
-import com.artsiom.footballpulse.domain.model.TeamDetails
-import java.time.LocalDate
-import java.time.Period
-import java.time.format.DateTimeParseException
 import kotlinx.coroutines.launch
 
 class TeamDetailsFragment : Fragment() {
@@ -40,7 +35,6 @@ class TeamDetailsFragment : Fragment() {
             return fragment
         }
 
-        private val POSITION_ORDER = listOf("Goalkeepers", "Defenders", "Midfielders", "Forwards")
     }
 
     override fun onCreateView(
@@ -64,13 +58,7 @@ class TeamDetailsFragment : Fragment() {
         val contentLayout = view.findViewById<View>(R.id.contentLayout)
         val btnBack = view.findViewById<TextView>(R.id.btnBack)
 
-        val teamCrest = view.findViewById<ImageView>(R.id.teamCrest)
-        val teamName = view.findViewById<TextView>(R.id.teamName)
-        val teamShortName = view.findViewById<TextView>(R.id.teamShortName)
-        val infoContainer = view.findViewById<LinearLayout>(R.id.infoContainer)
-        val infoCard = view.findViewById<View>(R.id.infoCard)
-        val squadCard = view.findViewById<View>(R.id.squadCard)
-        val squadContainer = view.findViewById<LinearLayout>(R.id.squadContainer)
+        val binding = TeamDetailsViews(view)
 
         btnBack.setOnClickListener { requireActivity().supportFragmentManager.popBackStack() }
         retryButton.setOnClickListener { viewModel.retry() }
@@ -94,12 +82,7 @@ class TeamDetailsFragment : Fragment() {
                             progressBar.visibility = View.GONE
                             errorLayout.visibility = View.GONE
                             contentLayout.visibility = View.VISIBLE
-                            bindTeam(
-                                state.team,
-                                teamCrest, teamName, teamShortName,
-                                infoContainer, infoCard,
-                                squadCard, squadContainer
-                            )
+                            bindTeam(state.content, binding)
                         }
                     }
                 }
@@ -107,16 +90,8 @@ class TeamDetailsFragment : Fragment() {
         }
     }
 
-    private fun bindTeam(
-        team: TeamDetails,
-        crestView: ImageView,
-        nameView: TextView,
-        shortNameView: TextView,
-        infoContainer: LinearLayout,
-        infoCard: View,
-        squadCard: View,
-        squadContainer: LinearLayout
-    ) {
+    private fun bindTeam(model: TeamDetailsUiModel, binding: TeamDetailsViews) = with(binding) {
+        val team = model.team
         crestView.load(team.crest) {
             crossfade(true)
             placeholder(R.drawable.ic_placeholder_crest)
@@ -125,34 +100,30 @@ class TeamDetailsFragment : Fragment() {
 
         nameView.text = team.name
 
-        val shortLabel = listOfNotNull(team.shortName, team.tla?.let { "($it)" })
-            .joinToString(" ")
-        shortNameView.text = shortLabel
-        shortNameView.visibility = if (shortLabel.isBlank()) View.GONE else View.VISIBLE
+        shortNameView.text = model.shortLabel
+        shortNameView.visibility = if (model.shortLabel.isBlank()) View.GONE else View.VISIBLE
 
-        populateInfoRows(infoContainer, team)
+        populateInfoRows(infoContainer, model.infoRows)
         infoCard.visibility = View.VISIBLE
 
-        if (team.squad.isNotEmpty()) {
+        if (model.showSquad) {
             squadCard.visibility = View.VISIBLE
-            populateSquad(squadContainer, team.squad)
+            populateSquad(squadContainer, model.squadGroups)
         } else {
             squadCard.visibility = View.GONE
         }
     }
 
-    private fun populateInfoRows(container: LinearLayout, team: TeamDetails) {
+    private fun populateInfoRows(container: LinearLayout, rows: List<InfoRowUiModel>) {
         container.removeAllViews()
         val ctx = requireContext()
         val density = ctx.resources.displayMetrics.density
         val hPad = (12 * density).toInt()
         val vPad = (10 * density).toInt()
 
-        buildList {
-            team.founded?.let { add("Founded" to it.toString()) }
-            team.venue?.let { add("Venue" to it) }
-            team.clubColors?.let { add("Colors" to it) }
-        }.forEachIndexed { index, (label, value) ->
+        rows.forEachIndexed { index, item ->
+            val label = getString(item.label)
+            val value = item.value
             if (index > 0) {
                 val divider = View(ctx)
                 divider.layoutParams = LinearLayout.LayoutParams(
@@ -194,22 +165,17 @@ class TeamDetailsFragment : Fragment() {
         return row
     }
 
-    private fun populateSquad(container: LinearLayout, squad: List<SquadPlayer>) {
+    private fun populateSquad(container: LinearLayout, groups: List<SquadGroupUiModel>) {
         container.removeAllViews()
         val ctx = requireContext()
         val density = ctx.resources.displayMetrics.density
         val hPad = (12 * density).toInt()
         val vPad = (8 * density).toInt()
 
-        val grouped = squad.groupBy { normalizePosition(it.position) }.filterKeys { it != null }
-
-        POSITION_ORDER.forEach { posKey ->
-            val players = grouped[posKey] ?: return@forEach
-            if (players.isEmpty()) return@forEach
-
+        groups.forEach { group ->
             // Position group header
             val headerTv = TextView(ctx)
-            headerTv.text = posKey
+            headerTv.setText(group.label)
             headerTv.textSize = 12f
             headerTv.setTypeface(null, Typeface.BOLD)
             headerTv.setTextColor(ContextCompat.getColor(ctx, R.color.color_text_secondary))
@@ -223,29 +189,18 @@ class TeamDetailsFragment : Fragment() {
             divider.setBackgroundColor(ContextCompat.getColor(ctx, R.color.color_divider))
             container.addView(divider)
 
-            players.sortedBy { it.shirtNumber ?: Int.MAX_VALUE }.forEach { player ->
+            group.players.forEach { player ->
                 container.addView(buildPlayerRow(ctx, hPad, vPad, player))
             }
         }
 
     }
 
-    private fun normalizePosition(position: String?): String? {
-        return when (position) {
-            "Goalkeeper" -> "Goalkeepers"
-            "Centre-Back", "Left-Back", "Right-Back" -> "Defenders"
-            "Defensive Midfield", "Central Midfield", "Attacking Midfield",
-            "Left Midfield", "Right Midfield" -> "Midfielders"
-            "Centre-Forward", "Left Winger", "Right Winger", "Second Striker" -> "Forwards"
-            else -> null
-        }
-    }
-
     private fun buildPlayerRow(
         ctx: android.content.Context,
         hPad: Int,
         vPad: Int,
-        player: SquadPlayer
+        player: SquadPlayerUiModel
     ): LinearLayout {
         val density = ctx.resources.displayMetrics.density
         val row = LinearLayout(ctx)
@@ -254,7 +209,7 @@ class TeamDetailsFragment : Fragment() {
         row.setPadding(hPad, vPad, hPad, vPad)
 
         val numberTv = TextView(ctx)
-        numberTv.text = player.shirtNumber?.toString() ?: "–"
+        numberTv.text = player.number
         numberTv.textSize = 13f
         numberTv.setTextColor(ContextCompat.getColor(ctx, R.color.color_text_hint))
         numberTv.gravity = Gravity.CENTER
@@ -272,17 +227,16 @@ class TeamDetailsFragment : Fragment() {
         row.addView(nameTv)
 
         val nationalityTv = TextView(ctx)
-        val flag = countryFlag(player.nationality)
-        nationalityTv.text = if (player.nationality != null) "$flag ${player.nationality}" else ""
+        nationalityTv.text = player.nationality
         nationalityTv.textSize = 12f
         nationalityTv.setTextColor(ContextCompat.getColor(ctx, R.color.color_text_hint))
         nationalityTv.gravity = Gravity.END
         row.addView(nationalityTv)
 
-        val age = calculateAge(player.dateOfBirth)
+        val age = player.age
         if (age != null) {
             val ageTv = TextView(ctx)
-            ageTv.text = age.toString()
+            ageTv.text = age
             ageTv.textSize = 13f
             ageTv.setTextColor(ContextCompat.getColor(ctx, R.color.color_text_hint))
             ageTv.gravity = Gravity.END
@@ -293,67 +247,14 @@ class TeamDetailsFragment : Fragment() {
         return row
     }
 
-    private fun calculateAge(dateOfBirth: String?): Int? {
-        if (dateOfBirth == null) return null
-        val birthDate = try {
-            LocalDate.parse(dateOfBirth)
-        } catch (_: DateTimeParseException) {
-            return null
-        }
-        return Period.between(birthDate, LocalDate.now()).years
-    }
 
-    private fun countryFlag(nationality: String?): String = when (nationality) {
-        "Spain" -> "🇪🇸"
-        "Poland" -> "🇵🇱"
-        "France" -> "🇫🇷"
-        "Germany" -> "🇩🇪"
-        "Brazil" -> "🇧🇷"
-        "Argentina" -> "🇦🇷"
-        "Portugal" -> "🇵🇹"
-        "England" -> "🏴󠁧󠁢󠁥󠁮󠁧󠁿"
-        "Netherlands" -> "🇳🇱"
-        "Belgium" -> "🇧🇪"
-        "Italy" -> "🇮🇹"
-        "Croatia" -> "🇭🇷"
-        "Uruguay" -> "🇺🇾"
-        "Denmark" -> "🇩🇰"
-        "Sweden" -> "🇸🇪"
-        "Norway" -> "🇳🇴"
-        "Switzerland" -> "🇨🇭"
-        "Austria" -> "🇦🇹"
-        "Czech Republic" -> "🇨🇿"
-        "Slovakia" -> "🇸🇰"
-        "Serbia" -> "🇷🇸"
-        "Ukraine" -> "🇺🇦"
-        "Turkey" -> "🇹🇷"
-        "Morocco" -> "🇲🇦"
-        "Senegal" -> "🇸🇳"
-        "Ivory Coast" -> "🇨🇮"
-        "Ghana" -> "🇬🇭"
-        "Nigeria" -> "🇳🇬"
-        "Cameroon" -> "🇨🇲"
-        "USA" -> "🇺🇸"
-        "Canada" -> "🇨🇦"
-        "Mexico" -> "🇲🇽"
-        "Colombia" -> "🇨🇴"
-        "Chile" -> "🇨🇱"
-        "Ecuador" -> "🇪🇨"
-        "Japan" -> "🇯🇵"
-        "South Korea" -> "🇰🇷"
-        "Australia" -> "🇦🇺"
-        "Scotland" -> "🏴󠁧󠁢󠁳󠁣󠁴󠁿"
-        "Wales" -> "🏴󠁧󠁢󠁷󠁬󠁳󠁿"
-        "Ireland" -> "🇮🇪"
-        "Albania" -> "🇦🇱"
-        "Slovenia" -> "🇸🇮"
-        "Hungary" -> "🇭🇺"
-        "Romania" -> "🇷🇴"
-        "Bulgaria" -> "🇧🇬"
-        "Greece" -> "🇬🇷"
-        "Finland" -> "🇫🇮"
-        "Russia" -> "🇷🇺"
-        "Belarus" -> "🇧🇾"
-        else -> "🏳️"
+    private class TeamDetailsViews(view: View) {
+        val crestView = view.findViewById<ImageView>(R.id.teamCrest)
+        val nameView = view.findViewById<TextView>(R.id.teamName)
+        val shortNameView = view.findViewById<TextView>(R.id.teamShortName)
+        val infoContainer = view.findViewById<LinearLayout>(R.id.infoContainer)
+        val infoCard = view.findViewById<View>(R.id.infoCard)
+        val squadCard = view.findViewById<View>(R.id.squadCard)
+        val squadContainer = view.findViewById<LinearLayout>(R.id.squadContainer)
     }
 }

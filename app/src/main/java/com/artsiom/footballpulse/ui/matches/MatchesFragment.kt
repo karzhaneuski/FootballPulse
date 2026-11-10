@@ -19,7 +19,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.artsiom.footballpulse.FootballPulseApp
 import com.artsiom.footballpulse.MainActivity
 import com.artsiom.footballpulse.R
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 class MatchesFragment : Fragment() {
@@ -71,20 +70,13 @@ class MatchesFragment : Fragment() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
 
                 launch {
-                    combine(
-                        viewModel.currentMatchday,
-                        viewModel.currentLeagueCode,
-                        viewModel.uiState
-                    ) { matchday, league, state -> Triple(matchday, league, state) }
-                        .collect { (matchday, league, state) ->
-                            matchdayLabel.text = "Matchday $matchday"
-                            val max = viewModel.leagueMaxMatchdays[league] ?: 38
-                            val isLoading = state is MatchesUiState.Loading
-                            btnPrev.isEnabled = !isLoading && matchday > 1
-                            btnNext.isEnabled = !isLoading && matchday < max
-                            btnPrev.alpha = if (btnPrev.isEnabled) 1.0f else 0.3f
-                            btnNext.alpha = if (btnNext.isEnabled) 1.0f else 0.3f
-                        }
+                    viewModel.navigation.collect { navigation ->
+                        matchdayLabel.text = getString(R.string.matchday_format, navigation.matchday)
+                        btnPrev.isEnabled = navigation.previousEnabled
+                        btnNext.isEnabled = navigation.nextEnabled
+                        btnPrev.alpha = if (btnPrev.isEnabled) 1.0f else 0.3f
+                        btnNext.alpha = if (btnNext.isEnabled) 1.0f else 0.3f
+                    }
                 }
 
                 launch {
@@ -99,7 +91,7 @@ class MatchesFragment : Fragment() {
                                 progressBar.visibility = View.GONE
                                 recyclerView.visibility = View.VISIBLE
                                 errorLayout.visibility = View.GONE
-                                matchesAdapter.submitList(state.matches)
+                                matchesAdapter.submitList(state.items)
                             }
                             is MatchesUiState.Error -> {
                                 progressBar.visibility = View.GONE

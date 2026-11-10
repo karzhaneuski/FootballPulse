@@ -1,5 +1,6 @@
 package com.artsiom.footballpulse.ui
 
+import com.artsiom.footballpulse.domain.model.LeagueZone
 import com.artsiom.footballpulse.testing.FakeFootballRepository
 import com.artsiom.footballpulse.testing.ViewModelTest
 import com.artsiom.footballpulse.testing.record
@@ -20,6 +21,17 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class StandingsViewModelTest : ViewModelTest() {
     private val repository = FakeFootballRepository()
+
+    @Test
+    fun `success maps zones for selected league rather than the default league`() = runTest {
+        val vm = own(StandingsViewModel(repository))
+        vm.loadLeague("BL1")
+        runCurrent()
+        repository.standings.single().result.complete(listOf(standing.copy(position = 16)))
+        runCurrent()
+        val state = vm.uiState.value as StandingsUiState.Success
+        assertEquals(LeagueZone.PLAYOFF, state.rows.single().zone)
+    }
 
     @Test
     fun `initial load publishes loading then standings`() = runTest {

@@ -53,7 +53,9 @@ class StandingsViewModel(
             _uiState.value = StandingsUiState.Loading
             try {
                 val standings = repository.getStandings(_currentLeagueCode.value)
-                _uiState.value = StandingsUiState.Success(standings)
+                _uiState.value = StandingsUiState.Success(
+                    standings, mapStandings(standings, Leagues.forCode(_currentLeagueCode.value))
+                )
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
                 _uiState.value = StandingsUiState.Error(e.message ?: "Unknown error")

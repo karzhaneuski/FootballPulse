@@ -4,7 +4,7 @@ import com.artsiom.footballpulse.domain.model.Match
 
 sealed interface MatchesUiState {
     object Loading : MatchesUiState
-    data class Success(val matches: List<Match>) : MatchesUiState
+    data class Success(val matches: List<Match>, val items: List<MatchListItem> = mapMatches(matches)) : MatchesUiState
     data class Error(val message: String) : MatchesUiState
 
 }

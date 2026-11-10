@@ -2,6 +2,9 @@ package com.artsiom.footballpulse.ui.standings
 
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.artsiom.footballpulse.FootballPulseApp
 import com.artsiom.footballpulse.MainActivity
 import com.artsiom.footballpulse.R
+import com.artsiom.footballpulse.domain.model.LeagueZone
 import com.artsiom.footballpulse.ui.matches.LeaguesAdapter
 import kotlinx.coroutines.launch
 
@@ -49,6 +53,7 @@ class StandingsFragment : Fragment() {
         val btnFull = view.findViewById<TextView>(R.id.btnFull)
         val btnShort = view.findViewById<TextView>(R.id.btnShort)
         val btnForm = view.findViewById<TextView>(R.id.btnForm)
+        bindLegend(view.findViewById(R.id.standingsLegendText))
 
         // League selector (reuses existing LeaguesAdapter)
         val leaguesAdapter = LeaguesAdapter { league -> viewModel.loadLeague(league.code) }
@@ -88,7 +93,7 @@ class StandingsFragment : Fragment() {
                                 progressBar.visibility = View.GONE
                                 standingsRecyclerView.visibility = View.VISIBLE
                                 errorLayout.visibility = View.GONE
-                                standingsAdapter.submitList(state.standings)
+                                standingsAdapter.submitList(state.rows)
                             }
                             is StandingsUiState.Error -> {
                                 progressBar.visibility = View.GONE
@@ -108,6 +113,23 @@ class StandingsFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun bindLegend(label: TextView) {
+        val text = SpannableStringBuilder()
+        listOf(
+            LeagueZone.UCL to R.string.zone_ucl,
+            LeagueZone.UEL to R.string.zone_uel,
+            LeagueZone.UECL to R.string.zone_uecl,
+            LeagueZone.RELEGATION to R.string.zone_relegation,
+            LeagueZone.PLAYOFF to R.string.zone_playoff
+        ).forEach { (zone, title) ->
+            if (text.isNotEmpty()) text.append("  ")
+            text.append("● ", ForegroundColorSpan(standingsZoneColor(requireContext(), zone)),
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            text.append(getString(title))
+        }
+        label.text = text
     }
 
     private fun updateModeButtons(

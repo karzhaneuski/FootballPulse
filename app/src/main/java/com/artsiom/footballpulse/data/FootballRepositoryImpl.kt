@@ -3,6 +3,7 @@ package com.artsiom.footballpulse.data
 import com.artsiom.footballpulse.data.remote.FootballApiService
 import com.artsiom.footballpulse.data.remote.MatchDto
 import com.artsiom.footballpulse.domain.model.Match
+import com.artsiom.footballpulse.domain.model.FootballSeason
 import com.artsiom.footballpulse.domain.model.MatchDetail
 import com.artsiom.footballpulse.domain.model.MatchdayResult
 import com.artsiom.footballpulse.domain.model.SquadPlayer
@@ -11,8 +12,6 @@ import com.artsiom.footballpulse.domain.model.TeamDetails
 import com.artsiom.footballpulse.domain.repository.FootballRepository
 import java.time.Clock
 import java.time.Instant
-import java.time.LocalDate
-import java.time.Month
 import kotlinx.coroutines.CancellationException
 
 class FootballRepositoryImpl(
@@ -21,7 +20,7 @@ class FootballRepositoryImpl(
 ) : FootballRepository {
 
     override suspend fun getCurrentMatchdayResult(leagueCode: String): MatchdayResult {
-        val season = computeCurrentSeason()
+        val season = FootballSeason.current(clock)
         val response = api.getMatches(leagueCode, season)
         if (!response.isSuccessful) {
             throw Exception("HTTP ${response.code()}: ${response.message()}")
@@ -85,7 +84,7 @@ class FootballRepositoryImpl(
         // football-data.org free tier returns form=null in standings.
         // Compute it from the finished matches endpoint instead.
         val formByTeamId: Map<Int, String> = try {
-            val matchesResponse = api.getMatches(leagueCode, computeCurrentSeason())
+            val matchesResponse = api.getMatches(leagueCode, FootballSeason.current(clock))
             if (matchesResponse.isSuccessful) {
                 computeForm(matchesResponse.body()?.matches ?: emptyList())
             } else emptyMap()
@@ -163,11 +162,7 @@ class FootballRepositoryImpl(
         )
     }
 
-    private fun computeCurrentSeason(): Int {
-        val date = LocalDate.now(clock)
-        // European leagues start in August.
-        return if (date.monthValue >= Month.AUGUST.value) date.year else date.year - 1
-    }
+
 }
 
 internal fun computeForm(matches: List<MatchDto>): Map<Int, String> {
