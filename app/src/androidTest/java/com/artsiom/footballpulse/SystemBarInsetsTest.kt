@@ -6,6 +6,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.artsiom.footballpulse.ui.standings.StandingsFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -20,24 +21,27 @@ class SystemBarInsetsTest {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             InstrumentationRegistry.getInstrumentation().waitForIdleSync()
             scenario.onActivity { activity ->
-                assertInsets(activity, R.id.leaguesRecyclerView)
+                assertInsets(activity, activity.findViewById(R.id.leaguesRecyclerView))
                 activity.findViewById<BottomNavigationView>(R.id.bottomNav)
                     .selectedItemId = R.id.nav_standings
             }
             InstrumentationRegistry.getInstrumentation().waitForIdleSync()
             scenario.onActivity { activity ->
-                assertInsets(activity, R.id.standingsLeaguesRecyclerView)
+                assertInsets(activity, standingsView(activity))
                 ViewCompat.requestApplyInsets(activity.findViewById(android.R.id.content))
             }
             InstrumentationRegistry.getInstrumentation().waitForIdleSync()
             scenario.onActivity { activity ->
                 // Redispatch must not accumulate padding.
-                assertInsets(activity, R.id.standingsLeaguesRecyclerView)
+                assertInsets(activity, standingsView(activity))
             }
         }
     }
 
-    private fun assertInsets(activity: MainActivity, leagueTabsId: Int) {
+    private fun standingsView(activity: MainActivity): View =
+        activity.supportFragmentManager.fragments.filterIsInstance<StandingsFragment>().single().requireView()
+
+    private fun assertInsets(activity: MainActivity, tabs: View) {
         val content = activity.findViewById<View>(android.R.id.content)
         val windowInsets = ViewCompat.getRootWindowInsets(content)
         assertNotNull(windowInsets)
@@ -49,7 +53,6 @@ class SystemBarInsetsTest {
         assertEquals(bars.bottom, content.paddingBottom)
         assertEquals(bars.left, content.paddingLeft)
         assertEquals(bars.right, content.paddingRight)
-        val tabs = activity.findViewById<View>(leagueTabsId)
         val position = IntArray(2)
         tabs.getLocationOnScreen(position)
         assertEquals(bars.top, position[1])
