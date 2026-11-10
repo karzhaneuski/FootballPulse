@@ -1,7 +1,6 @@
 [versions]
-agp = "9.1.0"
-# Core 1.19.x requires compileSdk 37; 1.18.0 supports the current compileSdk 36.
-coreKtx = "1.18.0"
+agp = "9.5.1"
+coreKtx = "1.19.1"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
@@ -10,13 +9,12 @@ activity = "1.13.0"
 retrofit = "3.0.0"
 okhttp = "4.12.0"
 coroutines = "1.11.0"
-# D-007: Lifecycle Compose 2.11+ requires compileSdk 37.
-lifecycle = "2.10.0"
+lifecycle = "2.11.0"
 room = "2.6.1"
 coil = "2.7.0"
 hilt = "2.50"
 detekt = "1.23.8"
-# Must match the Kotlin compiler bundled in AGP 9.1.0.
+# Must match the Kotlin compiler bundled in AGP 9.5.1 (2.2.10).
 composeCompiler = "2.2.10"
 composeBom = "2026.06.01"
 # D-007: Navigation Compose 2.10+ requires compileSdk 37.

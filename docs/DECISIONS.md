@@ -69,6 +69,7 @@ proposal: [docs/proposals/19-compose-migration.md](proposals/19-compose-migratio
 - #14 runs before the screen steps or is folded into them; #13 is re-scoped to what remains after the migration.
 - AUDIT §4 item 7 (ViewBinding + ListAdapter) is rejected.
 - New follow-up issue created: "Upgrade AGP to 9.5 and compileSdk to 37" (`agent:codex`, `size:M`), scheduled after migration step 6 (removes the Lifecycle pin and Dependabot ignore rules).
+- *Amendment (#82):* AGP 9.5.1 and `compileSdk 37` landed, so the Lifecycle pin is reverted: Lifecycle is back on 2.11.0 and the Dependabot ignore rules tied to `compileSdk 37` (Lifecycle, Compose BOM, `navigation-compose`, `hilt-lifecycle-viewmodel-compose`, `fragment-compose`) are removed. The Compose compiler plugin stays at 2.2.10 because AGP 9.5.1 still bundles Kotlin 2.2.10.
 
 ## D-006: Dependency upgrades in grouped sequential steps, then Dependabot
 
@@ -107,6 +108,7 @@ Room 2.6.1 stays until decided in #17. Pinned for #34: Hilt 2.59.2 and KSP 2.3.1
 - Every step requires `./gradlew assembleDebug testDebugUnitTest lintDebug` and `./gradlew assembleRelease` to verify R8/ProGuard compatibility.
 - Separate `needs-decision` issue created: #45 ("Raise targetSdk to 36", `size:M`), scheduled with #19.
 - *Note:* Lifecycle in step 3 was amended by D-007 (downgraded 2.11.0 → 2.10.0 for Compose compatibility on compileSdk 36).
+- *Amendment (#82):* Lifecycle is back on 2.11.0 and `core-ktx` is unblocked (1.19.1) now that AGP is 9.5.1 and `compileSdk` is 37; the `core-ktx` and Lifecycle Dependabot ignore rules are removed. The Room freeze (#17) and the Hilt/KSP pins are unchanged: AGP 9.5.1 still bundles Kotlin 2.2.10, so Hilt stays at 2.59.2 (Hilt 2.60+ needs Kotlin 2.3.21) and KSP at 2.3.13.
 
 ## D-005: Dependency injection with Hilt, introduced in two steps
 
