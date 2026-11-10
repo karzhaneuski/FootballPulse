@@ -20,4 +20,8 @@
     <string name="zone_playoff">Playoff</string>
     <string name="standings_legend">UCL · UEL · UECL · Relegation · Playoff</string>
     <string name="standings_places_note">Actual places may differ due to cup winners and UEFA European Performance Spots.</string>
+    <string name="match_details_back">← Back</string>
+    <string name="match_details_score">Score</string>
+    <string name="match_details_score_separator">"  -  "</string>
+    <string name="match_details_preview_error">Unable to load match</string>
 </resources>
