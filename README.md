@@ -39,13 +39,13 @@ An Android app for browsing football matches, standings, and team info across th
 - **Networking:** Retrofit2 + OkHttp
 - **Async:** Kotlin Coroutines
 - **Image loading:** Coil
-- **UI:** Material Design 3, ViewBinding, RecyclerView
+- **UI:** Jetpack Compose (Material 3), Navigation Compose
 - **API:** [football-data.org](https://www.football-data.org/) (free tier)
 
 ## Architecture
 
 The app follows MVVM pattern with a clean separation of layers:
-- **UI layer** — Fragments + ViewBinding, observe StateFlow from ViewModel
+- **UI layer** — Jetpack Compose screens in a single Activity (`Scaffold` + `NavigationBar` + Navigation Compose), collecting StateFlow from ViewModel
 - **ViewModel layer** — holds UI state, triggers data loading, exposes StateFlow
 - **Repository layer** — single source of truth, maps DTOs to domain models
 - **Data layer** — Retrofit API interface + DTOs with @SerializedName
@@ -72,7 +72,7 @@ FOOTBALL_API_KEY=your_key_here
 - [ ] Search functionality
 - [ ] Favourite teams / matches
 - [ ] Push notifications for live matches
-- [ ] Jetpack Compose migration
+- [x] Jetpack Compose migration
 
 ## License
 

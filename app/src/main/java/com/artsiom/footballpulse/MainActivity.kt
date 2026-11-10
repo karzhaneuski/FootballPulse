@@ -1,101 +1,54 @@
 package com.artsiom.footballpulse
 
+import android.graphics.Color
 import android.os.Bundle
-import android.view.View
+import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
+import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updatePadding
-import androidx.fragment.app.Fragment
-import com.artsiom.footballpulse.ui.matchdetails.MatchDetailsFragment
-import com.artsiom.footballpulse.ui.matches.MatchesFragment
-import com.artsiom.footballpulse.ui.standings.StandingsFragment
-import com.artsiom.footballpulse.ui.teamdetails.TeamDetailsFragment
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import com.artsiom.footballpulse.ui.shell.AppShell
+import com.artsiom.footballpulse.ui.theme.FootballPulseTheme
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
 
     companion object {
         private const val PREFS_NAME = "settings"
         private const val KEY_DARK_MODE = "dark_mode"
+        private const val LIGHT_SCRIM = 0xE6FFFFFF.toInt()
+        private const val DARK_SCRIM = 0x801B1B1B.toInt()
     }
-
-    private val matchesFragment by lazy { MatchesFragment() }
-    private val standingsFragment by lazy { StandingsFragment() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        val isDark = prefs.getBoolean(KEY_DARK_MODE, false)
-        AppCompatDelegate.setDefaultNightMode(
-            if (isDark) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
-        )
-
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
-
-        val content = findViewById<View>(android.R.id.content)
-        ViewCompat.setOnApplyWindowInsetsListener(content) { view, insets ->
-            val bars = insets.getInsets(
-                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
-            )
-            view.updatePadding(left = bars.left, top = bars.top, right = bars.right, bottom = bars.bottom)
-            // The parent keeps both content and bottom navigation inside the bars;
-            // consuming prevents BottomNavigationView from applying the bottom inset twice.
-            WindowInsetsCompat.CONSUMED
-        }
-        ViewCompat.requestApplyInsets(content)
-
-        val btnThemeToggle = findViewById<FloatingActionButton>(R.id.btnThemeToggle)
-        val isNightNow = AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES
-        btnThemeToggle.setImageResource(if (isNightNow) R.drawable.ic_sun else R.drawable.ic_moon)
-
-        btnThemeToggle.setOnClickListener {
-            val isDarkNow = AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES
-            if (isDarkNow) {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-                prefs.edit().putBoolean(KEY_DARK_MODE, false).apply()
-            } else {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-                prefs.edit().putBoolean(KEY_DARK_MODE, true).apply()
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val repository = (application as FootballPulseApp).container.repository
+        setContent {
+            // The in-app toggle overrides the system setting, so it is kept as state here
+            // (survives rotation via rememberSaveable) and persisted for the next launch.
+            var darkTheme by rememberSaveable { mutableStateOf(prefs.getBoolean(KEY_DARK_MODE, false)) }
+            DisposableEffect(darkTheme) {
+                // System bar icon colors must follow the in-app theme, not the system one.
+                enableEdgeToEdge(
+                    statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { darkTheme },
+                    navigationBarStyle = SystemBarStyle.auto(LIGHT_SCRIM, DARK_SCRIM) { darkTheme }
+                )
+                onDispose { }
+            }
+            FootballPulseTheme(darkTheme = darkTheme) {
+                AppShell(
+                    repository = repository,
+                    darkTheme = darkTheme,
+                    onToggleTheme = {
+                        darkTheme = !darkTheme
+                        prefs.edit().putBoolean(KEY_DARK_MODE, darkTheme).apply()
+                    }
+                )
             }
         }
-
-        if (savedInstanceState == null) {
-            showFragment(matchesFragment)
-        }
-
-        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
-        bottomNav.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_matches -> { showFragment(matchesFragment); true }
-                R.id.nav_standings -> { showFragment(standingsFragment); true }
-                else -> false
-            }
-        }
-    }
-
-    private fun showFragment(target: Fragment) {
-        val tx = supportFragmentManager.beginTransaction()
-        supportFragmentManager.fragments.forEach { if (it !== target) tx.hide(it) }
-        if (!target.isAdded) tx.add(R.id.fragmentContainer, target) else tx.show(target)
-        tx.commit()
-    }
-
-    fun navigateToMatchDetails(matchId: Int) {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainer, MatchDetailsFragment.newInstance(matchId))
-            .addToBackStack(null)
-            .commit()
-    }
-
-    fun navigateToTeamDetails(teamId: Int) {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainer, TeamDetailsFragment.newInstance(teamId))
-            .addToBackStack(null)
-            .commit()
     }
 }

@@ -19,8 +19,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
@@ -35,7 +33,6 @@ import com.artsiom.footballpulse.ui.common.LoadingState
 import com.artsiom.footballpulse.ui.matchdetails.MatchDetailsAppearance
 import com.artsiom.footballpulse.ui.matchdetails.matchDetailsAppearance
 import com.artsiom.footballpulse.ui.matchdetails.matchTextStyle
-import com.google.android.material.color.MaterialColors
 
 @Composable
 fun TeamDetailsScreen(
@@ -44,7 +41,6 @@ fun TeamDetailsScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Reuse the XML appearance bridge until the app shell migrates in D-007 step 6.
     val appearance = matchDetailsAppearance()
     val typography = MaterialTheme.typography.copy(
         bodyLarge = matchTextStyle(14, appearance.colors.onSurfaceVariant, alignment = TextAlign.Center),
@@ -54,9 +50,7 @@ fun TeamDetailsScreen(
     MaterialTheme(colorScheme = appearance.colors, typography = typography) {
         Surface(modifier.fillMaxSize(), color = appearance.colors.background) {
             when (state) {
-                TeamDetailsUiState.Loading -> MaterialTheme(
-                    colorScheme = appearance.colors.copy(primary = appearance.controlColor)
-                ) { LoadingState() }
+                TeamDetailsUiState.Loading -> LoadingState()
                 is TeamDetailsUiState.Error -> ErrorState(state.message, onRetry, retryButtonMinWidth = 88.dp)
                 is TeamDetailsUiState.Success -> TeamDetailsContent(state.content, onBack, appearance)
             }
@@ -114,9 +108,7 @@ private fun TeamDetailsCard(appearance: MatchDetailsAppearance, content: @Compos
 
 @Composable
 private fun TeamHeader(model: TeamDetailsUiModel, appearance: MatchDetailsAppearance) {
-    val titleColor = Color(MaterialColors.getColor(
-        LocalContext.current, com.google.android.material.R.attr.colorOnSurface, android.graphics.Color.BLACK
-    ))
+    val titleColor = appearance.titleColor
     TeamDetailsCard(appearance) {
         Column(Modifier.fillMaxWidth().padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             ClubCrest(

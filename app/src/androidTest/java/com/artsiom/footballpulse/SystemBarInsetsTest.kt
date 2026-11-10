@@ -1,68 +1,50 @@
 package com.artsiom.footballpulse
 
-import android.view.View
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
-import com.artsiom.footballpulse.ui.standings.StandingsFragment
-import com.artsiom.footballpulse.ui.matches.MatchesFragment
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import org.junit.Assert.assertEquals
+import com.artsiom.footballpulse.ui.shell.TAG_APP_CONTENT
+import com.artsiom.footballpulse.ui.shell.TAG_BOTTOM_NAV
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class SystemBarInsetsTest {
+    @get:Rule
+    val rule = createAndroidComposeRule<MainActivity>()
+
     @Test
     fun tabContentAndBottomNavigationStayInsideSystemBars() {
-        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
-            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
-            scenario.onActivity { activity ->
-                assertInsets(activity, activity.supportFragmentManager.fragments
-                    .filterIsInstance<MatchesFragment>().single().requireView())
-                activity.findViewById<BottomNavigationView>(R.id.bottomNav)
-                    .selectedItemId = R.id.nav_standings
-            }
-            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
-            scenario.onActivity { activity ->
-                assertInsets(activity, standingsView(activity))
-                ViewCompat.requestApplyInsets(activity.findViewById(android.R.id.content))
-            }
-            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
-            scenario.onActivity { activity ->
-                // Redispatch must not accumulate padding.
-                assertInsets(activity, standingsView(activity))
-            }
-        }
+        assertInsets()
+        rule.onNodeWithText(rule.activity.getString(R.string.nav_standings)).performClick()
+        rule.waitForIdle()
+        assertInsets()
     }
 
-    private fun standingsView(activity: MainActivity): View =
-        activity.supportFragmentManager.fragments.filterIsInstance<StandingsFragment>().single().requireView()
-
-    private fun assertInsets(activity: MainActivity, tabs: View) {
-        val content = activity.findViewById<View>(android.R.id.content)
-        val windowInsets = ViewCompat.getRootWindowInsets(content)
+    private fun assertInsets() {
+        rule.onNodeWithTag(TAG_APP_CONTENT).assertIsDisplayed()
+        val root = rule.activity.window.decorView
+        val windowInsets = ViewCompat.getRootWindowInsets(root)
         assertNotNull(windowInsets)
         val bars = windowInsets!!.getInsets(
             WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
         )
         assertTrue("The portrait device must have a visible status bar", bars.top > 0)
-        assertEquals(bars.top, content.paddingTop)
-        assertEquals(bars.bottom, content.paddingBottom)
-        assertEquals(bars.left, content.paddingLeft)
-        assertEquals(bars.right, content.paddingRight)
-        val position = IntArray(2)
-        tabs.getLocationOnScreen(position)
-        assertEquals(bars.top, position[1])
-        assertEquals(0, tabs.paddingTop)
-        val bottomNav = activity.findViewById<View>(R.id.bottomNav)
-        bottomNav.getLocationOnScreen(position)
-        assertTrue(position[1] + bottomNav.height <= content.height - bars.bottom)
-        val fragmentContainer = activity.findViewById<View>(R.id.fragmentContainer)
-        assertTrue(fragmentContainer.bottom <= bottomNav.top)
+        val content = rule.onNodeWithTag(TAG_APP_CONTENT).fetchSemanticsNode().boundsInWindow
+        val bottomNav = rule.onNodeWithTag(TAG_BOTTOM_NAV).fetchSemanticsNode().boundsInWindow
+        assertTrue("Content must start below the status bar", content.top >= bars.top)
+        assertTrue("Content must end above the bottom navigation", content.bottom <= bottomNav.top)
+        // The bar may draw behind the system navigation bar, but its items must stay clear of it.
+        val label = rule.activity.getString(R.string.nav_matches)
+        val tabs = rule.onNodeWithText(label).fetchSemanticsNode().boundsInWindow
+        assertTrue("Tab labels must stay above the system navigation bar", tabs.bottom <= root.height - bars.bottom)
     }
 }
