@@ -4,7 +4,6 @@ import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
@@ -24,12 +22,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
@@ -39,10 +34,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.SubcomposeAsyncImage
-import coil.request.ImageRequest
 import com.artsiom.footballpulse.R
 import com.artsiom.footballpulse.domain.model.MatchDetail
+import com.artsiom.footballpulse.ui.common.ClubCrest
+import com.artsiom.footballpulse.ui.common.ErrorState
 import com.artsiom.footballpulse.ui.common.LoadingState
 import com.artsiom.footballpulse.ui.presentation.MatchStatusStyle
 import com.artsiom.footballpulse.ui.theme.FootballPulseTheme
@@ -66,7 +61,9 @@ fun MatchDetailsScreen(
                 MatchDetailsUiState.Loading -> MaterialTheme(
                     colorScheme = appearance.colors.copy(primary = appearance.controlColor)
                 ) { LoadingState() }
-                is MatchDetailsUiState.Error -> MatchDetailsError(state.message, onRetry)
+                is MatchDetailsUiState.Error -> ErrorState(
+                    state.message, onRetry, retryButtonMinWidth = 88.dp
+                )
                 is MatchDetailsUiState.Success -> MatchDetailsContent(state.content, onBack, appearance)
             }
         }
@@ -141,7 +138,13 @@ private fun MatchTeam(
 ) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         if (home) {
-            MatchCrest(crest)
+            ClubCrest(
+                crestUrl = crest,
+                contentDescription = null,
+                modifier = Modifier.size(32.dp),
+                crossfade = true,
+                placeholderColor = colorResource(R.color.color_status_finished_bg)
+            )
             Spacer(Modifier.width(8.dp))
         }
         BasicText(
@@ -154,7 +157,13 @@ private fun MatchTeam(
         )
         if (!home) {
             Spacer(Modifier.width(8.dp))
-            MatchCrest(crest)
+            ClubCrest(
+                crestUrl = crest,
+                contentDescription = null,
+                modifier = Modifier.size(32.dp),
+                crossfade = true,
+                placeholderColor = colorResource(R.color.color_status_finished_bg)
+            )
         }
     }
 }
@@ -209,21 +218,6 @@ private fun MatchScoreRow(score: ScoreRowUiModel, appearance: MatchDetailsAppear
         BasicText(score.away, Modifier.widthIn(min = 28.dp),
             style = matchTextStyle(14, appearance.colors.onSurface, FontWeight.Bold))
     }
-}
-
-@Composable
-private fun MatchCrest(url: String?) {
-    val context = LocalContext.current
-    val request = remember(context, url) { ImageRequest.Builder(context).data(url).crossfade(true).build() }
-    val placeholder = colorResource(R.color.color_status_finished_bg)
-    SubcomposeAsyncImage(
-        model = request,
-        contentDescription = null,
-        modifier = Modifier.size(32.dp),
-        contentScale = ContentScale.Fit,
-        loading = { Box(Modifier.fillMaxSize().background(placeholder, CircleShape)) },
-        error = { Box(Modifier.fillMaxSize().background(placeholder, CircleShape)) }
-    )
 }
 
 @Preview(name = "Loading light", uiMode = Configuration.UI_MODE_NIGHT_NO, widthDp = 360, heightDp = 640)

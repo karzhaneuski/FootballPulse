@@ -1,22 +1,10 @@
 package com.artsiom.footballpulse.ui.matchdetails
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import com.artsiom.footballpulse.R
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -74,18 +62,3 @@ internal fun matchTextStyle(
     textAlign = alignment,
     platformStyle = PlatformTextStyle(includeFontPadding = true)
 )
-
-@Composable
-internal fun MatchDetailsError(message: String, onRetry: () -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(message, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
-        // The XML MaterialButton reserves 88dp even for a short retry label.
-        Button(onClick = onRetry, modifier = Modifier.widthIn(min = 88.dp)) {
-            Text(stringResource(R.string.retry))
-        }
-    }
-}
