@@ -7,6 +7,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.artsiom.footballpulse.ui.standings.StandingsFragment
+import com.artsiom.footballpulse.ui.matches.MatchesFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -21,7 +22,8 @@ class SystemBarInsetsTest {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             InstrumentationRegistry.getInstrumentation().waitForIdleSync()
             scenario.onActivity { activity ->
-                assertInsets(activity, activity.findViewById(R.id.leaguesRecyclerView))
+                assertInsets(activity, activity.supportFragmentManager.fragments
+                    .filterIsInstance<MatchesFragment>().single().requireView())
                 activity.findViewById<BottomNavigationView>(R.id.bottomNav)
                     .selectedItemId = R.id.nav_standings
             }

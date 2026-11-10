@@ -46,4 +46,9 @@
     <string name="standings_form_draw">D</string>
     <string name="standings_form_loss">L</string>
     <string name="standings_preview_error">Unable to load standings</string>
+    <string name="matches_previous_arrow">‹</string>
+    <string name="matches_next_arrow">›</string>
+    <string name="matches_previous_matchday">Previous matchday</string>
+    <string name="matches_next_matchday">Next matchday</string>
+    <string name="matches_preview_error">Unable to load matches</string>
 </resources>
