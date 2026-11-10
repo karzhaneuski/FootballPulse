@@ -21,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -40,7 +39,6 @@ import com.artsiom.footballpulse.ui.common.LeagueSelector
 import com.artsiom.footballpulse.ui.common.LoadingState
 import com.artsiom.footballpulse.ui.matchdetails.matchDetailsAppearance
 import com.artsiom.footballpulse.ui.matchdetails.matchTextStyle
-import com.google.android.material.color.MaterialColors
 
 @Composable
 fun MatchesScreen(
@@ -64,13 +62,11 @@ fun MatchesScreen(
                     LeagueSelector(leagues, selectedLeagueCode, actions.onLeagueSelected, Modifier.fillMaxWidth())
                 }
                 Surface(Modifier.zIndex(1f), color = appearance.colors.surface, shadowElevation = 2.dp) {
-                    MatchdaySelector(navigation, actions)
+                    MatchdaySelector(navigation, actions, appearance.titleColor)
                 }
                 Box(Modifier.fillMaxWidth().weight(1f)) {
                     when (state) {
-                        MatchesUiState.Loading -> MaterialTheme(
-                            colorScheme = appearance.colors.copy(primary = appearance.controlColor)
-                        ) { LoadingState() }
+                        MatchesUiState.Loading -> LoadingState()
                         is MatchesUiState.Error -> ErrorState(
                             state.message, actions.onRetry, retryButtonMinWidth = 88.dp, spacing = 12.dp
                         )
@@ -97,10 +93,7 @@ fun MatchesScreen(
 }
 
 @Composable
-private fun MatchdaySelector(navigation: MatchdayNavigation, actions: MatchesActions) {
-    val textColor = Color(MaterialColors.getColor(
-        LocalContext.current, com.google.android.material.R.attr.colorOnSurface, android.graphics.Color.BLACK
-    ))
+private fun MatchdaySelector(navigation: MatchdayNavigation, actions: MatchesActions, textColor: Color) {
     Row(Modifier.fillMaxWidth().height(52.dp), verticalAlignment = Alignment.CenterVertically) {
         MatchdayArrow(true, navigation.previousEnabled, textColor, actions.onPreviousMatchday)
         BasicText(

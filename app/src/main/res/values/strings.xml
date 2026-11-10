@@ -51,4 +51,7 @@
     <string name="matches_previous_matchday">Previous matchday</string>
     <string name="matches_next_matchday">Next matchday</string>
     <string name="matches_preview_error">Unable to load matches</string>
+    <string name="nav_matches">Matches</string>
+    <string name="nav_standings">Standings</string>
+    <string name="toggle_theme">Toggle theme</string>
 </resources>

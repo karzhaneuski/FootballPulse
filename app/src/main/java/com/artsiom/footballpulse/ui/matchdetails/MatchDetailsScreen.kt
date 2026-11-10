@@ -58,9 +58,7 @@ fun MatchDetailsScreen(
     MaterialTheme(colorScheme = appearance.colors, typography = typography) {
         Surface(modifier.fillMaxSize(), color = appearance.colors.background) {
             when (state) {
-                MatchDetailsUiState.Loading -> MaterialTheme(
-                    colorScheme = appearance.colors.copy(primary = appearance.controlColor)
-                ) { LoadingState() }
+                MatchDetailsUiState.Loading -> LoadingState()
                 is MatchDetailsUiState.Error -> ErrorState(
                     state.message, onRetry, retryButtonMinWidth = 88.dp
                 )

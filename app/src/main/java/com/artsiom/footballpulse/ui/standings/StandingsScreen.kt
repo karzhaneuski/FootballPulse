@@ -70,9 +70,7 @@ fun StandingsScreen(
                 StandingsLegend()
                 Box(Modifier.fillMaxWidth().weight(1f)) {
                     when (state) {
-                        StandingsUiState.Loading -> MaterialTheme(
-                            colorScheme = appearance.colors.copy(primary = appearance.controlColor)
-                        ) { LoadingState() }
+                        StandingsUiState.Loading -> LoadingState()
                         is StandingsUiState.Error -> ErrorState(
                             state.message, actions.onRetry, retryButtonMinWidth = 88.dp, spacing = 12.dp
                         )
