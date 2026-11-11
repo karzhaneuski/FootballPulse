@@ -142,6 +142,8 @@ Room 2.6.1 stays until decided in #17. Pinned for #34: Hilt 2.59.2 and KSP 2.3.1
 - Unit tests (#15) can be written as soon as step 1 lands without waiting for Hilt or toolchain changes.
 - KSP introduced in step 2 can be shared with Room if selected in #17.
 
+- *Amendment (#82):* AGP 9.5.1 / compileSdk 37 do not change the DI compiler pins: AGP still bundles Kotlin 2.2.10. Use Hilt 2.59.2 and KSP 2.3.13 for #34; Hilt 2.60+ requires Kotlin 2.3.21, so its Dependabot ignore remains. The Compose shell uses activity-scoped tab ViewModels and back-stack-entry-scoped details ViewModels; Hilt must preserve those scopes. Plain constructor-based fake repositories remain supported in unit tests.
+
 ## D-004: GEMINI.md delegates to AGENTS.md to avoid rule duplication in Antigravity
 
 - **Date:** 2026-11-08
