@@ -1,5 +1,9 @@
 package com.artsiom.footballpulse.ui.teamdetails
 
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import androidx.lifecycle.SavedStateHandle
+import com.artsiom.footballpulse.ui.shell.Routes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.artsiom.footballpulse.domain.model.TeamDetails
@@ -18,10 +22,15 @@ sealed interface TeamDetailsUiState {
     data class Error(val message: String) : TeamDetailsUiState
 }
 
+@HiltViewModel
 class TeamDetailsViewModel(
     private val repository: FootballRepository,
     private val teamId: Int
 ) : ViewModel() {
+    @Inject
+    constructor(repository: FootballRepository, savedStateHandle: SavedStateHandle) :
+        this(repository, checkNotNull(savedStateHandle.get<Int>(Routes.ARG_TEAM_ID)))
+
 
     private val _uiState = MutableStateFlow<TeamDetailsUiState>(TeamDetailsUiState.Loading)
     val uiState: StateFlow<TeamDetailsUiState> = _uiState

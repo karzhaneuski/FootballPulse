@@ -1,5 +1,7 @@
 package com.artsiom.footballpulse.ui.standings
 
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.artsiom.footballpulse.domain.model.Leagues
@@ -10,7 +12,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class StandingsViewModel(
+@HiltViewModel
+class StandingsViewModel @Inject constructor(
     private val repository: FootballRepository
 ) : ViewModel() {
 
