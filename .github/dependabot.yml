@@ -5,11 +5,9 @@ updates:
     schedule:
       interval: "weekly"
     ignore:
-      # D-006: Core 1.19+ requires compileSdk 37; this project compiles against 36.
-      - dependency-name: "androidx.core:core-ktx"
-        versions: ["[1.19.0,)"]
-      # D-005/D-006: Dagger artifacts and the Hilt plugin must stay <= 2.59.2
-      # with Kotlin bundled in AGP 9.1; 2.60+ needs a deliberate toolchain upgrade.
+      # D-005/D-006: Dagger artifacts and the Hilt plugin must stay <= 2.59.2.
+      # AGP 9.5.1 still bundles Kotlin 2.2.10, while Hilt 2.60+ is built against Kotlin 2.3.21;
+      # lift this rule once an AGP release bundles Kotlin >= 2.3.21.
       - dependency-name: "com.google.dagger*"
         versions: ["[2.60,)"]
       # D-006: Freeze Room updates until the caching decision in #17.
@@ -20,22 +18,6 @@ updates:
       # D-006: Apply the same AGP policy to its Maven artifact; patches stay allowed.
       - dependency-name: "com.android.tools.build:gradle"
         update-types: ["version-update:semver-major", "version-update:semver-minor"]
-      # D-007: lifecycle-runtime-compose 2.11+ requires compileSdk 37, unsupported by AGP 9.1.0.
-      # Stay on 2.10.0 until the AGP/compileSdk upgrade.
-      - dependency-name: "androidx.lifecycle:*"
-        versions: ["[2.11.0,)"]
-      # D-007: Later Compose BOMs require compileSdk 37; keep the verified 2026.06.01 BOM.
-      - dependency-name: "androidx.compose:compose-bom"
-        versions: ["[2026.08.00,)"]
-      # D-007: Navigation Compose 2.10+ requires the separate AGP/compileSdk 37 upgrade.
-      - dependency-name: "androidx.navigation:navigation-compose"
-        versions: ["[2.10.0,)"]
-      # D-007: Hilt Compose 1.4+ requires the separate AGP/compileSdk 37 upgrade.
-      - dependency-name: "androidx.hilt:hilt-lifecycle-viewmodel-compose"
-        versions: ["[1.4.0,)"]
-      # D-007: Fragment Compose 1.9+ requires the separate AGP/compileSdk 37 upgrade.
-      - dependency-name: "androidx.fragment:fragment-compose"
-        versions: ["[1.9.0,)"]
     # Major upgrades remain individual PRs for easier compatibility review.
     groups:
       androidx-and-material:

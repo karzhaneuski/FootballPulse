@@ -20,7 +20,7 @@ plugins {
 
 android {
     namespace = "com.artsiom.footballpulse"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.artsiom.footballpulse"
