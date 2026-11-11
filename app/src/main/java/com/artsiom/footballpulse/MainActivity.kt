@@ -2,6 +2,7 @@ package com.artsiom.footballpulse
 
 import android.graphics.Color
 import android.os.Bundle
+import dagger.hilt.android.AndroidEntryPoint
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -14,6 +15,7 @@ import androidx.compose.runtime.setValue
 import com.artsiom.footballpulse.ui.shell.AppShell
 import com.artsiom.footballpulse.ui.theme.FootballPulseTheme
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     companion object {
@@ -26,7 +28,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        val repository = (application as FootballPulseApp).container.repository
         setContent {
             // The in-app toggle overrides the system setting, so it is kept as state here
             // (survives rotation via rememberSaveable) and persisted for the next launch.
@@ -41,7 +42,6 @@ class MainActivity : ComponentActivity() {
             }
             FootballPulseTheme(darkTheme = darkTheme) {
                 AppShell(
-                    repository = repository,
                     darkTheme = darkTheme,
                     onToggleTheme = {
                         darkTheme = !darkTheme

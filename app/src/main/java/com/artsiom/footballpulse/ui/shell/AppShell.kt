@@ -29,7 +29,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.artsiom.footballpulse.R
-import com.artsiom.footballpulse.domain.repository.FootballRepository
 
 internal const val TAG_APP_CONTENT = "app_content"
 internal const val TAG_BOTTOM_NAV = "bottom_nav"
@@ -40,7 +39,7 @@ private enum class Tab(val route: String, @StringRes val label: Int, @DrawableRe
 }
 
 @Composable
-fun AppShell(repository: FootballRepository, darkTheme: Boolean, onToggleTheme: () -> Unit) {
+fun AppShell(darkTheme: Boolean, onToggleTheme: () -> Unit) {
     val navController = rememberNavController()
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
     // Details screens keep the tab they were opened from highlighted, as the old bottom navigation did.
@@ -59,7 +58,7 @@ fun AppShell(repository: FootballRepository, darkTheme: Boolean, onToggleTheme: 
         // The old root inset listener covered the cutout as well as the system bars.
         contentWindowInsets = WindowInsets.systemBars.union(WindowInsets.displayCutout)
     ) { innerPadding ->
-        AppNavHost(navController, repository, Modifier.padding(innerPadding).testTag(TAG_APP_CONTENT))
+        AppNavHost(navController, Modifier.padding(innerPadding).testTag(TAG_APP_CONTENT))
     }
 }
 

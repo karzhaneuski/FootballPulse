@@ -1,5 +1,7 @@
 package com.artsiom.footballpulse.ui
 
+import androidx.lifecycle.SavedStateHandle
+import com.artsiom.footballpulse.ui.shell.Routes
 import com.artsiom.footballpulse.testing.FakeFootballRepository
 import com.artsiom.footballpulse.testing.ViewModelTest
 import com.artsiom.footballpulse.testing.matchDetail
@@ -18,6 +20,13 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class MatchDetailsViewModelTest : ViewModelTest() {
     private val repository = FakeFootballRepository()
+
+    @Test
+    fun `injected constructor reads the navigation identifier without Hilt runtime`() = runTest {
+        own(MatchDetailsViewModel(repository, SavedStateHandle(mapOf(Routes.ARG_MATCH_ID to matchDetail.id))))
+        runCurrent()
+        assertEquals(listOf(matchDetail.id), repository.matches.single().arguments)
+    }
 
     @Test
     fun `initial load publishes loading then requested details`() = runTest {

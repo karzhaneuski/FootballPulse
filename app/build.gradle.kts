@@ -14,6 +14,8 @@ val footballApiKey: String =
 
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.hilt.android)
+    alias(libs.plugins.ksp)
     alias(libs.plugins.detekt)
     alias(libs.plugins.compose.compiler)
 }
@@ -55,6 +57,10 @@ android {
 }
 
 dependencies {
+    implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.viewmodel.compose)
+    ksp(libs.hilt.compiler)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity)
 

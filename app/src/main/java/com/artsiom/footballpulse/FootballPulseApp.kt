@@ -1,15 +1,15 @@
 package com.artsiom.footballpulse
 
 import android.app.Application
+import dagger.hilt.android.HiltAndroidApp
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.decode.SvgDecoder
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
 
+@HiltAndroidApp
 class FootballPulseApp : Application(), ImageLoaderFactory {
-    val container: AppContainer by lazy { AppContainer() }
-
     override fun newImageLoader(): ImageLoader = ImageLoader.Builder(this)
         .components { add(SvgDecoder.Factory()) }
         .memoryCache { MemoryCache.Builder(this).build() }

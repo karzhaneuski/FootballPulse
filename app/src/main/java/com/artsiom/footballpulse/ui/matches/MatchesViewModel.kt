@@ -1,5 +1,7 @@
 package com.artsiom.footballpulse.ui.matches
 
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.artsiom.footballpulse.domain.model.Leagues
@@ -14,7 +16,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class MatchesViewModel(
+@HiltViewModel
+class MatchesViewModel @Inject constructor(
     private val repository: FootballRepository
 ) : ViewModel() {
 
