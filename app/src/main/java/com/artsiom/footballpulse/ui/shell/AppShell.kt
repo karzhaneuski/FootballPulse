@@ -34,7 +34,7 @@ import com.artsiom.footballpulse.domain.repository.FootballRepository
 internal const val TAG_APP_CONTENT = "app_content"
 internal const val TAG_BOTTOM_NAV = "bottom_nav"
 
-private enum class Tab(val route: String, @StringRes val label: Int, @DrawableRes val icon: Int) {
+private enum class Tab(val route: String, @param:StringRes val label: Int, @param:DrawableRes val icon: Int) {
     Matches(Routes.MATCHES, R.string.nav_matches, R.drawable.ic_matches),
     Standings(Routes.STANDINGS, R.string.nav_standings, R.drawable.ic_standings)
 }
